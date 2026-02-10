@@ -1,13 +1,14 @@
 import Container from "@/components/container";
-import { Column, DataTable } from "@/components/data-table";
+import ScannedItemCard from "@/components/scanned-item-card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue, } from "@/components/ui/select";
-import { Text, View } from "react-native";
+import { items } from "@/constants";
+import { FlatList, View } from "react-native";
 
 export default function Index() {
   return (
     <Container>
-      <View className="flex-col">
+      <View className="flex-col ">
         <View className="w-full">
           <Input
             placeholder="Barcode"
@@ -49,14 +50,18 @@ export default function Index() {
         </View>
       </View>
 
+
+      {/* scanned items */}
       <View>
-
-
-        <DataTable
-        data={data}
-        columns={columns}
+        <FlatList
+          data={items}
+          renderItem={({ item }) => (
+            <ScannedItemCard
+              key={item.barcode}
+              item={item}
+            />
+          )}
         />
-
       </View>
     </Container>
   );
@@ -64,55 +69,55 @@ export default function Index() {
 
 
 
-const data = [
-  {
-    id: "1",
-    barcode: "8901030890123",
-    uom: "PCS",
-    quantity: 120,
-  },
-  {
-    id: "2",
-    barcode: "9780201379624",
-    uom: "BOX",
-    quantity: 45,
-  },
-  {
-    id: "3",
-    barcode: "6294001234567",
-    uom: "KG",
-    quantity: 18,
-  },
-  {
-    id: "4",
-    barcode: "012345678905",
-    uom: "LITER",
-    quantity: 60,
-  },
-  {
-    id: "5",
-    barcode: "8806098765432",
-    uom: "PCS",
-    quantity: 250,
-  },
-];
+// const data = [
+//   {
+//     id: "1",
+//     barcode: "8901030890123",
+//     uom: "PCS",
+//     quantity: 120,
+//   },
+//   {
+//     id: "2",
+//     barcode: "9780201379624",
+//     uom: "BOX",
+//     quantity: 45,
+//   },
+//   {
+//     id: "3",
+//     barcode: "6294001234567",
+//     uom: "KG",
+//     quantity: 18,
+//   },
+//   {
+//     id: "4",
+//     barcode: "012345678905",
+//     uom: "LITER",
+//     quantity: 60,
+//   },
+//   {
+//     id: "5",
+//     barcode: "8806098765432",
+//     uom: "PCS",
+//     quantity: 250,
+//   },
+// ];
 
-const columns:Column<typeof data[number]>[]  = [
-  {
-    key: "barcode",
-    title: "Barcode",
-  },
-  {
-    key: "uom",
-    title: "UOM",
-  },
-  {
-    key: "quantity",
-    title: "Quantity",
-    render: (value) => (
-      <Text className="font-semibold text-blue-600">
-        {value}
-      </Text>
-    ),
-  },
-];
+// const columns: Column<typeof data[number]>[] = [
+//   {
+//     key: "barcode",
+//     title: "Barcode",
+//   },
+//   {
+//     key: "uom",
+//     title: "UOM",
+//   },
+//   {
+//     key: "quantity",
+//     title: "Quantity",
+//     render: (value) => (
+//       <Text className="font-semibold text-blue-600">
+//         {value}
+//       </Text>
+//     ),
+//   },
+// ];
