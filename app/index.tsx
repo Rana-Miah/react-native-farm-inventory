@@ -10,7 +10,7 @@ export default function Index() {
 
   return (
     <Container>
-      <View className="flex-col pb-4 gap-2">
+      <View className="flex-col ">
         <View className="w-full">
           <ScanItemForm/>
           <Input
@@ -55,16 +55,15 @@ export default function Index() {
 
 
       {/* scanned items */}
-      <View className="flex-1">
+      <View>
         <FlatList
-            showsVerticalScrollIndicator={false}
-            data={items}
-            renderItem={({ item }) => (
-                <ScannedItemCard
-                    key={item.barcode}
-                    item={item}
-                />
-            )}
+          data={items}
+          renderItem={({ item }) => (
+            <ScannedItemCard
+              key={item.barcode}
+              item={item}
+            />
+          )}
         />
       </View>
     </Container>

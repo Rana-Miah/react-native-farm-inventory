@@ -1,22 +1,16 @@
 import { items } from '@/constants'
-import { FontAwesome6 } from '@expo/vector-icons'
+import { MaterialIcons } from '@expo/vector-icons'
 import React from 'react'
 import { Text, View } from 'react-native'
-import { DetailsRow } from './details-row'
 import { Badge } from './ui/badge'
 import { Button } from './ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card'
-import { Input } from './ui/input'
 import { Separator } from './ui/separator'
 
 
-const ScannedItemCard = ({ item, enableActionBtn }: { item: typeof items[number], enableActionBtn?: boolean }) => {
-
-    const [isEditStage, setIsEditState] = React.useState(false)
-    const [q, setQ] = React.useState(item.quantity || 0)
-
+const ScannedItemCard = ({ item }: { item: typeof items[number] }) => {
     return (
-        <Card className='bg-white border-muted my-1 p-3 gap-3'>
+        <Card className='bg-white border-foreground my-2 p-3'>
             <CardHeader className='flex-1 flex-row items-center justify-between px-0'>
                 <View>
                     <CardTitle className='text-black'>
@@ -27,70 +21,71 @@ const ScannedItemCard = ({ item, enableActionBtn }: { item: typeof items[number]
                     </CardDescription>
                 </View>
 
-                {!enableActionBtn ? (
-                    <Badge
-                        variant="outline"
-                        className="border-muted-foreground rounded-full px-4 py-1 "
-                    >
-                        <Text className='text-sm font-bold'>{item.quantity} {item.uom}</Text>
-                    </Badge>
-                ) : (
-                    <View className='flex-row items-center gap-1'>
-                        <Button variant='outline' size={'sm'} onPress={() => setIsEditState(prev => !prev)}>
-                            <FontAwesome6 name={isEditStage ? "save" : 'edit'} color={"#124DA1"} size={20} />
-                        </Button>
-                        {!isEditStage && (
-                            <Button variant='destructive' size={'sm'} className=''>
-                                <FontAwesome6 name={'trash-can'} color={"#fff"} size={20} />
-                            </Button>
-                        )}
-                    </View>
-                )}
+                <View className="flex-row items-center gap-2 px-0">
+                    <Button variant={'destructive'} size={'sm'}
 
+                        onPress={() => alert('hello')}
+                    >
+                        <MaterialIcons name={'delete'} size={20} color={'#fff'} />
+                    </Button>
+                    <Button className='bg-[#E8F1FC]' size={'sm'} >
+                        <MaterialIcons name={'edit'} color={'#124DA1'} size={20} />
+                    </Button>
+                </View>
 
             </CardHeader>
-            <Separator className='m-0 p-0' />
+
             <CardContent className='flex-col gap-2 px-0 py-0'>
-                <DetailsRow icon={{ library: 'FontAwesome', name: 'barcode' }} label='item code' value={item.item_code} />
-                <DetailsRow icon={{ library: 'FontAwesome', name: 'file-text' }} label='description' value={item.description} />
+                <Icon name='tag' label='item code' value={item.item_code} />
+                <Icon name='description' label='description' value={item.description} />
             </CardContent>
-            {enableActionBtn && (
-                <>
-                    <Separator className='m-0 p-0' />
-                    <CardFooter className="flex-row items-center justify-between gap-2 p-0">
-                            <View className='flex-row items-center gap-1'>
-                                <View className='flex-row items-center justify-center w-8 h-8 bg-[##E8F1FC] rounded-md'>
-                                    <FontAwesome6 name={'layer-group'} color={"#124DA1"} size={20} />
-                                </View>
-                                <Text className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                                    Quantity
-                                </Text>
-                            </View>
-
-                            {
-                                !isEditStage ? (
-                                    <Badge
-                                        variant="outline"
-                                        className="border-muted-foreground rounded-full px-4 py-1 "
-                                    >
-                                        <Text className='text-sm font-bold'>{item.quantity} {item.uom}</Text>
-                                    </Badge>
-                                ) : (
-                                    <Input
-                                        className='flex-1 h-8 max-w-24'
-                                        value={q <= 0 ? "" : q.toString()}
-                                        keyboardType='numeric'
-                                        onChangeText={(text) => setQ(parseInt(text) || 0)}
-                                    />
-
-                                )
-                            }
-                    </CardFooter>
-                </>
-            )}
+            <Separator />
+            <CardFooter
+                className="flex items-center justify-between px-0"
+            >
+                <View className="flex-row items-center gap-2">
+                    <View className='flex-row items-center justify-center w-8 h-8 bg-[##E8F1FC] rounded-md'>
+                        <MaterialIcons name={'layers'} color={"#124DA1"} size={20} />
+                    </View>
+                    <Text className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        Quantity
+                    </Text>
+                </View>
+                <Badge
+                    variant="outline"
+                    className="border-muted-foreground rounded-full px-4 py-1 "
+                >
+                    <Text className='text-sm font-bold'>{item.quantity} {item.uom}</Text>
+                </Badge>
+            </CardFooter>
         </Card>
     )
 }
 
 export default ScannedItemCard
 
+type MaterialIconName = keyof typeof MaterialIcons.glyphMap;
+
+const Icon = ({
+    name,
+    label,
+    value
+}: { name: MaterialIconName, label: string, value: string }) => {
+
+    return (
+
+        <View className="flex-row items-center  gap-2 bg-white">
+            <View className='flex-row items-center justify-center w-8 h-8 bg-[##E8F1FC] rounded-md'>
+                <MaterialIcons name={name} color={"#124DA1"} size={20} />
+            </View>
+            <View className="flex-1">
+                <Text className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    {label}
+                </Text>
+                <Text className="flex-1 flex-wrap text-sm leading-relaxed font-semibold">
+                    {value}
+                </Text>
+            </View>
+        </View>
+    )
+}
