@@ -1,3 +1,5 @@
+export const ITEM_CODE_REGEX = /^0\d{7}-\d{4}$/
+
 export const items = [
     {
         barcode: "6284697582136486",

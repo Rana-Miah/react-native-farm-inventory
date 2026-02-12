@@ -16,3 +16,5 @@ export const copyToClipboard = async (text: string) => {
   await Clipboard.setStringAsync(text)
   alert('copied ' + text)
 }
+
+

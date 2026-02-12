@@ -2,21 +2,25 @@ import { FontAwesome6 } from "@expo/vector-icons";
 import { PortalHost } from "@rn-primitives/portal";
 import { Tabs } from "expo-router";
 import 'react-native-reanimated';
+
 import "./global.css";
 
+
 export default function RootLayout() {
+
+
   return (
     <>
-    
+
       <Tabs screenOptions={{
         tabBarLabel: "Home",
-        headerShown:false
+        headerShown: false
       }}>
         {rootLayoutScreens.map((screen) => (
           <Tabs.Screen
             key={screen.name}
             name={screen.name}
-            
+
             options={screen.options}
           />
         ))}
@@ -41,7 +45,7 @@ const rootLayoutScreens: RootLayoutScreens[] = [
   },
   {
     name: "items-list",
-    
+
     options: {
       tabBarLabel: "Items List",
       tabBarIcon: ({ color, size }) => (
@@ -51,7 +55,7 @@ const rootLayoutScreens: RootLayoutScreens[] = [
   },
   {
     name: "price",
-    
+
     options: {
       tabBarLabel: "Price",
       tabBarIcon: ({ color, size }) => (
@@ -61,7 +65,7 @@ const rootLayoutScreens: RootLayoutScreens[] = [
   },
   {
     name: "search",
-    
+
     options: {
       tabBarLabel: "Search",
       tabBarIcon: ({ color, size }) => (
@@ -71,7 +75,7 @@ const rootLayoutScreens: RootLayoutScreens[] = [
   },
   {
     name: "files",
-    
+
     options: {
       tabBarLabel: "Files",
       tabBarIcon: ({ color, size }) => (
@@ -81,7 +85,7 @@ const rootLayoutScreens: RootLayoutScreens[] = [
   },
   {
     name: "settings",
-    
+
     options: {
       tabBarLabel: "Settings",
       tabBarIcon: ({ color, size }) => (
