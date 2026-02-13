@@ -4,6 +4,7 @@ import { Tabs } from "expo-router";
 import 'react-native-reanimated';
 import Toast from 'react-native-toast-message';
 
+import StoreProvider from "@/components/provider/redux-store-provider";
 import "./global.css";
 
 
@@ -11,8 +12,7 @@ export default function RootLayout() {
 
 
   return (
-    <>
-
+    <StoreProvider>
       <Tabs screenOptions={{
         tabBarLabel: "Home",
         headerShown: false
@@ -27,8 +27,8 @@ export default function RootLayout() {
         ))}
       </Tabs>
       <PortalHost />
-      <Toast/>
-    </>
+      <Toast />
+    </StoreProvider>
   )
 }
 

@@ -71,7 +71,7 @@ export const barcodeTable = sqliteTable('barcode', {
     barcode: text('barcode').notNull().unique(),
     price: real('price').notNull(),
     description: text('description'),
-    itemCodeId: text('item_code_id').notNull().references(() => itemTable.id),
+    itemId: text('item_code_id').notNull().references(() => itemTable.id),
     unitId: text('unit_id').notNull().references(() => unitTable.id),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
@@ -79,7 +79,7 @@ export const barcodeTable = sqliteTable('barcode', {
 
 export const barcodeTableRelations = relations(barcodeTable, ({ one }) => ({
     item: one(itemTable, {
-        fields: [barcodeTable.itemCodeId],
+        fields: [barcodeTable.itemId],
         references: [itemTable.id],
         relationName: relationBetween('barcode,item')
     }),
@@ -93,4 +93,17 @@ export const barcodeTableRelations = relations(barcodeTable, ({ one }) => ({
 
 
 
+export const storedScannedItemTable = sqliteTable('stored_scanned_item', {
+    id: text('id').primaryKey().notNull().unique().$defaultFn(() => uuid()),
+    barcodeId: text('barcode_id').notNull().references(() => barcodeTable.id),
+    quantity: real('quantity').notNull(),
+})
 
+
+export const storedScannedItemTableRelations = relations(storedScannedItemTable, ({ one }) => ({
+    barcode: one(barcodeTable, {
+        fields: [storedScannedItemTable.barcodeId],
+        references: [barcodeTable.id],
+        relationName: relationBetween('stored_scanned_item,barcode')
+    })
+}))

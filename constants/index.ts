@@ -1,4 +1,5 @@
 export const ITEM_CODE_REGEX = /^0\d{7}-\d{4}$/
+export const valueIsItemCode = (code: string) => ITEM_CODE_REGEX.test(code)
 
 export const items = [
     {
