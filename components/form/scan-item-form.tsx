@@ -1,13 +1,15 @@
 import { ScanItemFormData, scanItemFormSchema } from "@/schema/scan-item-form-schema"
 import { zodResolver } from '@hookform/resolvers/zod'
+import React from "react"
 import { useForm } from "react-hook-form"
 import { View } from "react-native"
-import { Button } from "../ui/button"
+import Toast from "react-native-toast-message"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../ui/form"
 import { Input } from "../ui/input"
-import { Text } from "../ui/text"
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "../ui/select"
 
 export default function ScanItemForm() {
+    const [triggerWidth,setTriggerWidth] = React.useState(0)
     const form = useForm<ScanItemFormData>({
         resolver: zodResolver(scanItemFormSchema),
         defaultValues: {
@@ -38,7 +40,18 @@ export default function ScanItemForm() {
                                     onChangeText={field.onChange}
                                     value={field.value}
                                     onSubmitEditing={() => {
-                                        alert(field.value)
+                                        Toast.show({
+                                            type:'success',
+                                            position:'top',
+                                            text1:field.value,
+                                            text1Style:{
+                                                fontSize:16
+                                            },
+                                            text2:"hello",
+                                            text2Style:{
+                                                fontSize:12
+                                            },
+                                        })
                                     }}
                                 />
                             </FormControl>
@@ -48,18 +61,27 @@ export default function ScanItemForm() {
                 />
                 <View className="flex-row items-center gap-1">
                     <View className="flex-1">
-                        <FormField
-                            control={form.control}
-                            name="uom"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormControl>
-                                        <Input {...field} placeholder="UOM" onChangeText={field.onChange} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+                        <Select>
+                            <SelectTrigger
+
+                            onLayout={(e)=>setTriggerWidth(e.nativeEvent.layout.width)}
+                            >
+                                <SelectValue placeholder="UOM"/>
+                            </SelectTrigger>
+                            <SelectContent style={{ width: triggerWidth }}>
+                                <SelectGroup>
+                                    <SelectLabel>Units</SelectLabel>
+                                    <SelectItem value="KG" label="KG" />
+                                    <SelectItem value="PC" label="PC"/>
+                                    <SelectItem value="CT" label="CT"/>
+                                    <SelectItem value="CT1" label="CT1"/>
+                                    <SelectItem value="OU1" label="OU1"/>
+                                    <SelectItem value="OU2" label="OU2"/>
+                                    <SelectItem value="BAG" label="BAG"/>
+                                    <SelectItem value="CAN" label="CAN"/>
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
                     </View>
 
                     <View className="flex-1">
@@ -80,57 +102,7 @@ export default function ScanItemForm() {
                         />
                     </View>
                 </View>
-                <Button onPress={onSubmit} className="mt-5">
-                    <Text>Submit</Text>
-                </Button>
             </View>
         </Form>
-        // <View>
-        //     <Controller
-        //         control={control}
-        //         name="barcode"
-        //         render={({ field: { onChange, onBlur, value } }) => (
-        //             <TextInput
-        //                 placeholder="Barcode"
-        //                 onBlur={onBlur}
-        //                 onChangeText={onChange}
-        //                 value={value}
-        //             />
-        //         )}
-        //     />
-        //     {errors.barcode && <Text>{errors.barcode.message}.</Text>}
-
-        //     <Controller
-        //         control={control}
-        //         name="uom"
-        //         render={({ field: { onChange, onBlur, value } }) => (
-        //             <TextInput
-        //                 placeholder="UOM"
-        //                 onBlur={onBlur}
-        //                 onChangeText={onChange}
-        //                 value={value}
-        //             />
-        //         )}
-        //     />
-        //     {errors.uom && <Text>{errors.uom.message}.</Text>}
-
-
-        //     <Controller
-        //         control={control}
-        //         name="quantity"
-        //         render={({ field: { onChange, onBlur, value } }) => (
-        //             <Input
-        //                 placeholder="Quantity"
-        //                 keyboardType="numeric"
-        //                 onBlur={onBlur}
-        //                 onChangeText={onChange}
-        //                 value={value.toString()}
-        //             />
-        //         )}
-        //     />
-        //     {errors.quantity && <Text>{errors.quantity.message}quantity.</Text>}
-
-        //     <Button title="Submit" onPress={onSubmit} />
-        // </View>
     )
 }

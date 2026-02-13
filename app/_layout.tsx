@@ -2,6 +2,7 @@ import { FontAwesome6 } from "@expo/vector-icons";
 import { PortalHost } from "@rn-primitives/portal";
 import { Tabs } from "expo-router";
 import 'react-native-reanimated';
+import Toast from 'react-native-toast-message';
 
 import "./global.css";
 
@@ -26,6 +27,7 @@ export default function RootLayout() {
         ))}
       </Tabs>
       <PortalHost />
+      <Toast/>
     </>
   )
 }
