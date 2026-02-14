@@ -15,14 +15,30 @@ const Select = SelectPrimitive.Root;
 
 const SelectGroup = SelectPrimitive.Group;
 
-function SelectValue({
-  ref,
-  className,
-  ...props
-}: SelectPrimitive.ValueProps &
-  React.RefAttributes<SelectPrimitive.ValueRef> & {
-    className?: string;
-  }) {
+// function SelectValue({
+//   ref,
+//   className,
+//   ...props
+// }: SelectPrimitive.ValueProps &
+//   React.RefAttributes<SelectPrimitive.ValueRef> & {
+//     className?: string;
+//   }) {
+//   const { value } = SelectPrimitive.useRootContext();
+//   return (
+//     <SelectPrimitive.Value
+//       ref={ref}
+//       className={cn(
+//         'text-foreground line-clamp-1 flex flex-row items-center gap-2 text-sm',
+//         !value && 'text-muted-foreground',
+//         className
+//       )}
+//       {...props}
+//     />
+//   );
+// }
+
+
+function SelectValue({ ref, className, ...props }: SelectPrimitive.ValueProps & React.RefAttributes<SelectPrimitive.ValueRef> & { className?: string }) {
   const { value } = SelectPrimitive.useRootContext();
   return (
     <SelectPrimitive.Value
@@ -33,7 +49,9 @@ function SelectValue({
         className
       )}
       {...props}
-    />
+    >
+      {value?.label ?? props.placeholder}
+    </SelectPrimitive.Value>
   );
 }
 
@@ -249,5 +267,6 @@ export {
   SelectSeparator,
   SelectTrigger,
   SelectValue,
-  type Option,
+  type Option
 };
+

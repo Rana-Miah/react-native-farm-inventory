@@ -52,6 +52,7 @@ export default function Index() {
       {/* scanned items */}
       <FlatList
         className="pb-0 flex-1"
+        showsVerticalScrollIndicator={false}
         data={items}
         renderItem={({ item }) => (
           <ScannedItemCard

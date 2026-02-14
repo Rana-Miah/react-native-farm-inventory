@@ -4,10 +4,11 @@ import { getItemByItemCode } from "@/constants/query/item"
 import { useAppDispatch, useScannedItems } from "@/hooks/redux"
 import { clearItem, setItem } from "@/lib/redux/slice/scanned-item-slice"
 import { ScanItemFormData, scanItemFormSchema } from "@/schema/scan-item-form-schema"
+import { Feather } from "@expo/vector-icons"
 import { zodResolver } from '@hookform/resolvers/zod'
 import React from "react"
 import { useForm } from "react-hook-form"
-import { View } from "react-native"
+import { TouchableOpacity, View } from "react-native"
 import Toast from "react-native-toast-message"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../ui/form"
 import { Input } from "../ui/input"
@@ -15,6 +16,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrig
 
 export default function ScanItemForm() {
     const [triggerWidth, setTriggerWidth] = React.useState(0)
+    const quantityInputRef = React.useRef<any>(null)
     const { scannedItems } = useScannedItems()
     const dispatch = useAppDispatch()
 
@@ -29,11 +31,7 @@ export default function ScanItemForm() {
         },
     })
     const onSubmit = form.handleSubmit(value => {
-        // dispatch(addScannedItem(value))
-        // dispatch(clearItem())
-        // form.reset()
-        // console.log(scannedItems)
-
+        console.log({ value })
         Toast.show({
             type: 'success',
             text1: 'Item added successfully',
@@ -56,22 +54,40 @@ export default function ScanItemForm() {
                         <FormItem>
                             <FormLabel>Barcode</FormLabel>
                             <FormControl>
-                                <Input
-                                    placeholder="Barcode/Item-Code"
-                                    keyboardType="numeric"
-                                    returnKeyType="done"
-                                    onChangeText={field.onChange}
-                                    value={field.value}
-                                    onSubmitEditing={() => {
+                                <View className="relative">
+                                    <Input
+                                        placeholder="Barcode/Item-Code"
+                                        keyboardType="numeric"
+                                        returnKeyType="next"
+                                        onChangeText={field.onChange}
+                                        value={field.value}
+                                        onSubmitEditing={() => {
 
-                                        const isItemCode = valueIsItemCode(field.value)
+                                            const isItemCode = valueIsItemCode(field.value)
 
-                                        if (isItemCode) {
-                                            const item = getItemByItemCode(field.value)
+                                            if (isItemCode) {
+                                                const item = getItemByItemCode(field.value)
+                                                if (!item.data) {
+                                                    Toast.show({
+                                                        type: 'error',
+                                                        position: 'top',
+                                                        text1: item.message,
+                                                        text1Style: {
+                                                            fontSize: 16
+                                                        },
+                                                    })
+                                                    dispatch(clearItem())
+                                                    return
+                                                }
+                                                dispatch(setItem(item.data))
+                                                quantityInputRef.current?.focus()
+                                                return
+                                            }
+                                            const item = getItemByBarcode(field.value)
+
                                             if (!item.data) {
                                                 Toast.show({
                                                     type: 'error',
-                                                    position: 'top',
                                                     text1: item.message,
                                                     text1Style: {
                                                         fontSize: 16
@@ -81,25 +97,20 @@ export default function ScanItemForm() {
                                                 return
                                             }
                                             dispatch(setItem(item.data))
+                                            quantityInputRef.current?.focus()
                                             return
-                                        }
-                                        const item = getItemByBarcode(field.value)
+                                        }}
+                                    />
 
-                                        if (!item.data) {
-                                            Toast.show({
-                                                type: 'error',
-                                                text1: item.message,
-                                                text1Style: {
-                                                    fontSize: 16
-                                                },
-                                            })
-                                            dispatch(clearItem())
-                                            return
-                                        }
-                                        dispatch(setItem(item.data))
-                                        return
-                                    }}
-                                />
+                                    {/* Clear Button */}
+                                    {field.value.length > 0 ? (
+                                        <View className="absolute right-2.5 top-1/2 -translate-y-1/2">
+                                            <TouchableOpacity onPress={() => field.onChange('')}>
+                                                <Feather name="x-circle" size={24}/>
+                                            </TouchableOpacity>
+                                        </View>
+                                    ) : null}
+                                </View>
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -107,27 +118,35 @@ export default function ScanItemForm() {
                 />
                 <View className="flex-row items-center gap-1">
                     <View className="flex-1">
-                        <Select>
-                            <SelectTrigger
-
-                                onLayout={(e) => setTriggerWidth(e.nativeEvent.layout.width)}
-                            >
-                                <SelectValue placeholder="UOM" />
-                            </SelectTrigger>
-                            <SelectContent style={{ width: triggerWidth }}>
-                                <SelectGroup>
-                                    <SelectLabel>Units</SelectLabel>
-                                    <SelectItem value="KG" label="KG" />
-                                    <SelectItem value="PC" label="PC" />
-                                    <SelectItem value="CT" label="CT" />
-                                    <SelectItem value="CT1" label="CT1" />
-                                    <SelectItem value="OU1" label="OU1" />
-                                    <SelectItem value="OU2" label="OU2" />
-                                    <SelectItem value="BAG" label="BAG" />
-                                    <SelectItem value="CAN" label="CAN" />
-                                </SelectGroup>
-                            </SelectContent>
-                        </Select>
+                        <FormField
+                            name="uom"
+                            control={form.control}
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormControl>
+                                        <Select onValueChange={(option) => field.onChange(option?.value)} value={{ value: field.value, label: field.value }}>
+                                            <SelectTrigger onLayout={(e) => setTriggerWidth(e.nativeEvent.layout.width)}>
+                                                <SelectValue placeholder="UOM" />
+                                            </SelectTrigger>
+                                            <SelectContent style={{ width: triggerWidth }}>
+                                                <SelectGroup>
+                                                    <SelectLabel>Units</SelectLabel>
+                                                    <SelectItem value="KG" label="KG" />
+                                                    <SelectItem value="PC" label="PC" />
+                                                    <SelectItem value="CT" label="CT" />
+                                                    <SelectItem value="CT1" label="CT1" />
+                                                    <SelectItem value="OU1" label="OU1" />
+                                                    <SelectItem value="OU2" label="OU2" />
+                                                    <SelectItem value="BAG" label="BAG" />
+                                                    <SelectItem value="CAN" label="CAN" />
+                                                </SelectGroup>
+                                            </SelectContent>
+                                        </Select>
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                     </View>
 
                     <View className="flex-1">
@@ -139,8 +158,10 @@ export default function ScanItemForm() {
                                     <FormControl>
                                         <Input
                                             {...field}
+                                            ref={quantityInputRef}
                                             placeholder="Quantity"
                                             keyboardType="numeric"
+                                            returnKeyType="go"
                                             value={field.value.toString()}
                                             onChangeText={field.onChange}
                                             onSubmitEditing={() => {

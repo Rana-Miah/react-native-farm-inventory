@@ -11,6 +11,18 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from './ui/input'
 import { Separator } from './ui/separator'
 
+type ScannedItemCardHeader = {
+    title: string;
+    description: string;
+    headerComponent?: () => React.ReactNode
+}
+
+
+type ScannedItemCardProps = {
+    header: ScannedItemCardHeader,
+
+}
+
 
 const ScannedItemCard = ({ item, enableActionBtn }: { item: typeof items[number], enableActionBtn?: boolean }) => {
     const [isEditState, setIsEditState] = React.useState(false)
@@ -24,9 +36,9 @@ const ScannedItemCard = ({ item, enableActionBtn }: { item: typeof items[number]
     const onSubmit = form.handleSubmit((params) => {
         console.log(params)
         Toast.show({
-            type:"success",
-            text1:'Quantity',
-            text2:params.quantity.toString()
+            type: "success",
+            text1: 'Quantity',
+            text2: params.quantity.toString()
         })
     })
 
@@ -57,11 +69,11 @@ const ScannedItemCard = ({ item, enableActionBtn }: { item: typeof items[number]
                             }
                         </>
                     ) : (
-                        <Badge variant="outline" className="border-muted-foreground rounded-full px-4 py-1 ">
-                            <View>
-                                <Text className='text-sm font-bold w-full bg-red-500'>{item.quantity} {item.uom.toUpperCase()}</Text>
-                            </View>
-                        </Badge>
+                        <ItemQuantityUnit
+                            quantity={item.quantity}
+                            uom={item.uom}
+                            onPress={() => setIsEditState(prev => !prev)}
+                        />
                     )}
                 </View>
 
@@ -75,7 +87,7 @@ const ScannedItemCard = ({ item, enableActionBtn }: { item: typeof items[number]
                 enableActionBtn && (
                     <>
                         <Separator />
-                        <CardFooter className="flex items-center justify-between px-0">
+                        <CardFooter className="items-center justify-between px-0">
                             <View className="flex-row items-center gap-2">
                                 <View className='flex-row items-center justify-center w-8 h-8 bg-[#E8F1FC] rounded-md'>
                                     <MaterialIcons name={'layers'} color={"#124DA1"} size={20} />
@@ -93,7 +105,7 @@ const ScannedItemCard = ({ item, enableActionBtn }: { item: typeof items[number]
                                         render={({ field: { onChange, onBlur, value } }) => (
                                             <Input
                                                 className="h-8 w-28" // same height & width as badge
-                                                returnKeyType="done"
+                                                returnKeyType="go"
                                                 keyboardType='numeric'
                                                 onSubmitEditing={onSubmit}
                                                 onChangeText={onChange}
@@ -101,50 +113,34 @@ const ScannedItemCard = ({ item, enableActionBtn }: { item: typeof items[number]
                                             />
                                         )}
                                     />
-                                    </View>
-                                    ) : (
-                                    <Badge variant="outline" className="border-muted-foreground rounded-full px-4">
-                                            <Text onPress={()=>setIsEditState(prev=>!prev)} className='flex-1 max-w-12 text-center text-sm font-bold'>{item.quantity} {item.uom}</Text>
-                                    </Badge>
-                            )}
-                                </CardFooter>
-
-                        {/* <CardFooter
-                            className="flex items-center justify-between px-0"
-                        >
-                            <View className="flex-row items-center gap-2">
-                                <View className='flex-row items-center justify-center w-8 h-8 bg-[##E8F1FC] rounded-md'>
-                                    <MaterialIcons name={'layers'} color={"#124DA1"} size={20} />
                                 </View>
-                                <Text className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                                    Quantity
-                                </Text>
-                            </View>
-                            {isEditState ? (
-                                <Form {...form}>
-                                    <FormField
-                                        control={form.control}
-                                        name='quantity'
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormControl>
-                                                    <Input className=' h-8 max-w-28' returnKeyType='done' onSubmitEditing={onSubmit} />
-                                                </FormControl>
-                                            </FormItem>
-                                        )}
-                                    />
-                                </Form>
                             ) : (
-                                <Badge variant="outline" className="border-muted-foreground rounded-full px-4 py-1 ">
-                                    <Text className='text-sm font-bold'>{item.quantity} {item.uom}</Text>
-                                </Badge>
+                                <ItemQuantityUnit
+                                    quantity={item.quantity}
+                                    uom={item.uom}
+                                    onPress={() => setIsEditState(prev => !prev)}
+                                />
                             )}
-                        </CardFooter> */}
-                        </>
-                        )
+                        </CardFooter>
+                    </>
+                )
             }
-                    </Card>
-            )
+        </Card>
+    )
 }
 
-            export default ScannedItemCard
+export default ScannedItemCard
+
+
+type ItemQuantityUnitProps = {
+    quantity: number;
+    uom: string
+} & React.ComponentProps<typeof Text>
+
+const ItemQuantityUnit = ({ quantity, uom, ...props }: ItemQuantityUnitProps) => {
+    return (
+        <Badge variant="outline" className="border-muted-foreground rounded-full px-4">
+            <Text {...props} className='flex-1 max-w-12 text-center text-sm font-bold'>{quantity} {uom.toUpperCase()}</Text>
+        </Badge>
+    )
+}

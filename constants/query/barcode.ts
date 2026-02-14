@@ -1,5 +1,5 @@
 import { barcodes } from "../barcode";
-import { getItemById } from "./item";
+import { getItemById, Item } from "./item";
 import { getSupplierById } from "./supplier";
 import { getUnitById } from "./unit";
 
@@ -18,10 +18,10 @@ export const getBarcodesByItemCode = (itemCode: string) => {
     });
 }
 
-export const getItemByBarcode = (barcode: string) => {
+export const getItemByBarcode = (barcode: string):{ data: null | Item; message: string } => {
     const itemByBarcode = barcodes.find(b => b.barcode === barcode);
     if (!itemByBarcode) {
-        return { message: "Item not found" };
+        return { message: "Item not found",data:null };
     }
     const item = getItemById(itemByBarcode.itemId);
     if (!item) {
@@ -36,13 +36,30 @@ export const getItemByBarcode = (barcode: string) => {
     if (!supplier) {
         return { message: "Supplier not found", data: null };
     }
+
+    const barcodesByItemCode = getBarcodesByItemCode(item.item_code).filter(b=>b.unitId!=unit.id)
+
+
+    const units = barcodesByItemCode.map(barcode => {
+
+        return {
+            uom: barcode.unitName,
+            packing: barcode.packing,
+        }
+    })
+
+    const modifiedUnits = [{uom:unit.unitName,packing:unit.packing},...units]
+
     return {
         message: "Item found",
         data: {
-            ...item,
-            ...supplier,
-            ...unit,
-            ...itemByBarcode
+            itemCode:item.item_code,
+            description:item.item_description,
+            supplierCode:supplier.supplierCode,
+            supplierName:supplier.supplierName,
+            units:modifiedUnits,
+            barcode:itemByBarcode.barcode,
+            price:itemByBarcode.price
         }
     }
 }
