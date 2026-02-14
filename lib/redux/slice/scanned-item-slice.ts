@@ -1,12 +1,10 @@
-import { getItemByBarcode } from '@/constants/query/barcode';
-import { getItemByItemCode } from '@/constants/query/item';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 
-type ScannedItem = ReturnType<typeof getItemByBarcode>['data'] | ReturnType<typeof getItemByItemCode>['data']
+// type ScannedItem = ReturnType<typeof getItemByBarcode>['data'] | ReturnType<typeof getItemByItemCode>['data']
 
 type ScannedItemState = {
-    scannedItem: ScannedItem;
+    scannedItem: any;
 }
 
 const initialState: ScannedItemState = {
@@ -17,7 +15,7 @@ export const scannedItemSlice = createSlice({
     name: 'scannedItems',
     initialState,
     reducers: {
-        setItem: (state, action: PayloadAction<ScannedItem>) => {
+        setItem: (state, action: PayloadAction<any>) => {
             state.scannedItem = action.payload;
         },
         clearItem: (state) => {

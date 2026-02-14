@@ -1,7 +1,8 @@
 import { valueIsItemCode } from "@/constants"
 import { getItemByBarcode } from "@/constants/query/barcode"
 import { getItemByItemCode } from "@/constants/query/item"
-import { useAppDispatch, useScannedItems } from "@/hooks/redux"
+import { useAppDispatch } from "@/hooks/redux"
+import { useItems } from "@/hooks/tanstack-query/item"
 import { clearItem, setItem } from "@/lib/redux/slice/scanned-item-slice"
 import { ScanItemFormData, scanItemFormSchema } from "@/schema/scan-item-form-schema"
 import { Feather } from "@expo/vector-icons"
@@ -16,10 +17,13 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrig
 
 export default function ScanItemForm() {
     const [triggerWidth, setTriggerWidth] = React.useState(0)
-    const quantityInputRef = React.useRef<any>(null)
-    const { scannedItems } = useScannedItems()
-    const dispatch = useAppDispatch()
+    const [barcodeInputValue, setBarcodeInputValue] = React.useState<string>("")
 
+    const { data } = useItems(barcodeInputValue)
+
+    console.log({ data })
+    const quantityInputRef = React.useRef<any>(null)
+    const dispatch = useAppDispatch()
 
 
     const form = useForm<ScanItemFormData>({
@@ -62,6 +66,10 @@ export default function ScanItemForm() {
                                         onChangeText={field.onChange}
                                         value={field.value}
                                         onSubmitEditing={() => {
+
+                                            setBarcodeInputValue(field.value)
+
+                                            dispatch(setItem(JSON.stringify(data)))
 
                                             const isItemCode = valueIsItemCode(field.value)
 
@@ -109,7 +117,7 @@ export default function ScanItemForm() {
                                                 field.onChange('')
                                                 dispatch(clearItem())
                                             }}>
-                                                <Feather name="x-circle" size={24}/>
+                                                <Feather name="x-circle" size={24} />
                                             </TouchableOpacity>
                                         </View>
                                     ) : null}

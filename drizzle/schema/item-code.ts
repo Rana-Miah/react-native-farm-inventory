@@ -24,7 +24,7 @@ export const relationBetween = <T extends string>(bothTableName: OneComma<T>) =>
 export const itemTable = sqliteTable("users_table", {
     id: text('id').primaryKey().notNull().unique().$defaultFn(() => uuid()),
     supplierId: text('supplier_id').notNull().references(() => supplierTable.id),
-    item_code: text('item_code').notNull(),
+    item_code: text('item_code').notNull().unique(),
     item_description: text('item_description').notNull(),
     createdAt: createdAt(),
     updatedAt: updatedAt(),

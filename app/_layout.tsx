@@ -1,10 +1,12 @@
 import { FontAwesome6 } from "@expo/vector-icons";
 import { PortalHost } from "@rn-primitives/portal";
+import { QueryClientProvider } from '@tanstack/react-query';
 import { Tabs } from "expo-router";
 import 'react-native-reanimated';
 import Toast from 'react-native-toast-message';
 
 import StoreProvider from "@/components/provider/redux-store-provider";
+import { queryClient } from "@/lib/tanstack-query/client";
 import "./global.css";
 
 
@@ -12,23 +14,25 @@ export default function RootLayout() {
 
 
   return (
-    <StoreProvider>
-      <Tabs screenOptions={{
-        tabBarLabel: "Home",
-        headerShown: false
-      }}>
-        {rootLayoutScreens.map((screen) => (
-          <Tabs.Screen
-            key={screen.name}
-            name={screen.name}
+    <QueryClientProvider client={queryClient}>
+      <StoreProvider>
+        <Tabs screenOptions={{
+          tabBarLabel: "Home",
+          headerShown: false
+        }}>
+          {rootLayoutScreens.map((screen) => (
+            <Tabs.Screen
+              key={screen.name}
+              name={screen.name}
 
-            options={screen.options}
-          />
-        ))}
-      </Tabs>
-      <PortalHost />
-      <Toast />
-    </StoreProvider>
+              options={screen.options}
+            />
+          ))}
+        </Tabs>
+        <PortalHost />
+        <Toast />
+      </StoreProvider>
+    </QueryClientProvider>
   )
 }
 
