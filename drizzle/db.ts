@@ -5,4 +5,5 @@ import * as schema from './schema';
 
 const expo = SQLite.openDatabaseSync('inventory.db', { enableChangeListener: true });
 expo.execSync("PRAGMA foreign_keys = ON;");
+
 export const db = drizzle(expo, { schema });

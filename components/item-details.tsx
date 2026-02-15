@@ -1,4 +1,3 @@
-import { fetchItemsByBarcode } from '@/hooks/tanstack-query/item'
 import React from 'react'
 import { Text, View } from 'react-native'
 import { DetailsRow } from './details-row'
@@ -13,8 +12,12 @@ type ScannedItemCardHeader = {
 
 type ScannedItemCardProps = {
     header: ScannedItemCardHeader,
-    item: Awaited<ReturnType<typeof fetchItemsByBarcode>>
-
+    item: {
+        price: number,
+        unit: string,
+        item_code: string,
+        description: string
+    }
 }
 
 
@@ -35,16 +38,16 @@ export const ItemDetails = ({ header, item }: ScannedItemCardProps) => {
 
                 <View className="flex-row items-center gap-2 px-0">
                     <ItemPriceUnit
-                        price={item?.barcode.price??0}
-                        uom={item?.unit?.unitName||"N/A"}
+                        price={item.price}
+                        uom={item?.unit || "N/A"}
                     />
                 </View>
 
             </CardHeader>
 
             <CardContent className='flex-col gap-2 px-0 py-0'>
-                <DetailsRow icon={{ library: 'FontAwesome', name: 'hashtag' }} label='Item Code' value={item?.item?.item_code??"N/A"} />
-                <DetailsRow icon={{ library: 'FontAwesome', name: 'file-text' }} label='description' value={item?.item?.item_description??'N/A'} />
+                <DetailsRow icon={{ library: 'FontAwesome', name: 'hashtag' }} label='Item Code' value={item?.item_code ?? "N/A"} />
+                <DetailsRow icon={{ library: 'FontAwesome', name: 'file-text' }} label='description' value={item?.description ?? 'N/A'} />
             </CardContent>
 
         </Card>

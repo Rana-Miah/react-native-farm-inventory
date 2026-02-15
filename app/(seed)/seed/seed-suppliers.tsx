@@ -7,25 +7,11 @@ import { Text } from "@/components/ui/text"
 import { suppliers } from "@/constants/supplier"
 import { db } from "@/drizzle/db"
 import { supplierTable } from "@/drizzle/schema"
-import {
-    zodResolver
-} from "@hookform/resolvers/zod"
 import { useQuery } from "@tanstack/react-query"
 import { eq } from "drizzle-orm"
 import { useEffect, useState, useTransition } from "react"
-import {
-    useForm
-} from "react-hook-form"
 import { FlatList, View } from "react-native"
-import {
-    z
-} from "zod"
 import { NavLink } from "."
-
-const formSchema = z.object({
-    supplierId: z.string(),
-    seedQuantity: z.string(),
-});
 
 
 export const useGetSupplier = () => {
@@ -48,14 +34,9 @@ const seedSupplier = async () => {
 
 
 export default function SeedItemFrom() {
-    const [pending, startTransition] = useTransition()
-    const [items, setItems] = useState<any[]>([])
+    const [, startTransition] = useTransition()
+    const [, setItems] = useState<any[]>([])
     const { data, isError } = useGetSupplier()
-
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
-
-    })
 
     function onSubmit() {
         startTransition(
@@ -102,9 +83,10 @@ export default function SeedItemFrom() {
                     renderItem={({ item }) => (
                         <SeedItemDisplayCard
                             label={item.supplierCode}
-                            onPress={async () => {
+                            onDelete={async () => {
                                 await db.delete(supplierTable).where(eq(supplierTable.id, item.id))
                             }}
+                            onCopy={() => { }}
                             disabled={data?.length === 5}
 
                         />
@@ -117,13 +99,16 @@ export default function SeedItemFrom() {
 
 
 
-export const SeedItemDisplayCard = ({ label, disabled, onPress }: { label: string; disabled: boolean, onPress: () => void }) => {
+export const SeedItemDisplayCard = ({ label, disabled, onDelete, onCopy }: { label: string; disabled: boolean, onDelete: () => void, onCopy: () => void }) => {
     return (
         <View className="flex-row items-center justify-between gap-2 px-3 py-2">
             <Text>{label}</Text>
             <View className="flex-row items-center gap-1">
-                <Button disabled={disabled} onPress={onPress}>
+                <Button size={'sm'} disabled={disabled} onPress={onDelete}>
                     <Text>Delete</Text>
+                </Button>
+                <Button size={'sm'} disabled={disabled} onPress={onCopy}>
+                    <Text>Copy</Text>
                 </Button>
             </View>
         </View>

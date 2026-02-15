@@ -1,22 +1,25 @@
 import { useAppDispatch } from "@/hooks/redux"
-import { useItemsByScan } from "@/hooks/tanstack-query/item"
+import { useGetItemByBarcode } from "@/hooks/tanstack-query/item-query"
 import { clearItem, setItem } from "@/lib/redux/slice/scanned-item-slice"
 import { ScanItemFormData, scanItemFormSchema } from "@/schema/scan-item-form-schema"
 import { Feather } from "@expo/vector-icons"
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useQueryClient } from "@tanstack/react-query"
 import React from "react"
 import { useForm } from "react-hook-form"
 import { TouchableOpacity, View } from "react-native"
 import Toast from "react-native-toast-message"
+import { ItemDetails } from "../item-details"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../ui/form"
 import { Input } from "../ui/input"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "../ui/select"
+import { Separator } from "../ui/separator"
 
 export default function ScanItemForm() {
     const [triggerWidth, setTriggerWidth] = React.useState(0)
     const [barcodeInputValue, setBarcodeInputValue] = React.useState<string>("")
-
-    const { data, isError } = useItemsByScan(barcodeInputValue)
+    const qc = useQueryClient()
+    const { data, isError, isFetched } = useGetItemByBarcode(barcodeInputValue)
 
     const quantityInputRef = React.useRef<any>(null)
     const dispatch = useAppDispatch()
@@ -26,7 +29,7 @@ export default function ScanItemForm() {
         resolver: zodResolver(scanItemFormSchema),
         defaultValues: {
             barcode: "",
-            uom: data?.unit?.unitName??"",
+            uom: "",
             quantity: 1,
         },
     })
@@ -36,7 +39,7 @@ export default function ScanItemForm() {
         if (isError || !data) {
             Toast.show({
                 type: 'error',
-                text1: 'Item not found!sfsf',
+                text1: 'Item not found!',
                 text1Style: {
                     fontSize: 16
                 },
@@ -46,16 +49,16 @@ export default function ScanItemForm() {
         }
 
         quantityInputRef.current?.focus()
-        form.setValue('uom',data.unit.unitName)
-        dispatch(setItem(data))
+        form.setValue('uom', data.data?.unit_name ?? '')
+        dispatch(setItem("data"))
         Toast.show({
             type: 'success',
-            text1: data.barcode.barcode ?? "",
+            text1: data.msg,
             text1Style: {
                 fontSize: 16
             },
         })
-    }, [data, isError])
+    }, [barcodeInputValue, dispatch, form, data, isError])
 
 
 
@@ -75,7 +78,7 @@ export default function ScanItemForm() {
     //! handle submit function
     const handleOnSubmitEditing = (code: string) => {
         if (!code) {
-            form.setValue('uom',"")
+            form.setValue('uom', "")
             return
         }
         setBarcodeInputValue(code)
@@ -106,9 +109,11 @@ export default function ScanItemForm() {
                                     {/* Clear Button */}
                                     {field.value.length > 0 ? (
                                         <View className="absolute right-2.5 top-1/2 -translate-y-1/2">
-                                            <TouchableOpacity onPress={() => {
-                                                field.onChange('')
+                                            <TouchableOpacity onPress={async () => {
+                                                form.reset()
                                                 dispatch(clearItem())
+                                                setBarcodeInputValue("")
+                                                await qc.invalidateQueries({ queryKey: ['get-item-by-barcode'] })
                                             }}>
                                                 <Feather name="x-circle" size={24} />
                                             </TouchableOpacity>
@@ -129,9 +134,10 @@ export default function ScanItemForm() {
                                 <FormItem>
                                     <FormControl>
                                         <Select
-                                            onValueChange={(option) => field.onChange(option?.value)}
-                                            value={{ value: field.value, label: field.value }}
-                                            defaultValue={{ value: field.value, label: field.value }}
+                                            onValueChange={(option) => { field.onChange(option?.value); console.log(field.value) }}
+                                            value={{
+                                                value: field.value, label: (data && data.data ? data.data.units : []).filter(item => item.id === field.value)[0]?.unitName
+                                            }}
                                         >
                                             <SelectTrigger onLayout={(e) => setTriggerWidth(e.nativeEvent.layout.width)}>
                                                 <SelectValue placeholder="UOM" />
@@ -140,8 +146,12 @@ export default function ScanItemForm() {
                                                 <SelectGroup>
                                                     <SelectLabel>Units</SelectLabel>
                                                     {
-                                                        (data ? data.units : []).map((unit, i) => (
-                                                            <SelectItem value={unit?.unitName??"N/A"} label={unit?.unitName??"N/A"} key={unit?.id ?? i} />
+                                                        (data && data.data ? data.data.units : []).map((unit, i) => (
+                                                            <SelectItem
+                                                                value={unit?.id ?? "N/A"}
+                                                                label={`${unit.unitName ?? "N/A"} (${unit.packing})`}
+                                                                key={unit.id}
+                                                            />
                                                         ))
                                                     }
                                                     {/* <SelectItem value="KG" label="KG" />
@@ -193,6 +203,24 @@ export default function ScanItemForm() {
                     </View>
                 </View>
             </View>
+            <Separator className="my-3" />
+            <View>
+                {
+                    (barcodeInputValue && data?.data) && (
+                        <>
+                            <ItemDetails header={{ title: "Item Details", description: "Scanned item" }} item={{
+                                description: data.data?.br_description ?? "N/A",
+                                item_code: data.data?.item_code ?? "N/A",
+                                price: data.data?.price ?? 0,
+                                unit: data.data?.unit_name ?? "N/A"
+                            }} />
+                            <Separator className="my-3" />
+                        </>
+                    )
+                }
+            </View>
         </Form>
     )
 }
+
+

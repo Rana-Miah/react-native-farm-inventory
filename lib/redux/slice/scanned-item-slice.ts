@@ -1,4 +1,4 @@
-import { fetchItemsByBarcode } from '@/hooks/tanstack-query/item';
+import { fetchItemsByBarcode } from '@/hooks/tanstack-query/item-query';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 

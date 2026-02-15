@@ -11,10 +11,12 @@ import { items } from "@/constants/item"
 import { db } from "@/drizzle/db"
 import { itemTable, supplierTable } from "@/drizzle/schema"
 import { randomInt } from "@/drizzle/seed/seeding-factory"
+import { generateItemCode } from "@/lib/seed"
+import { copyToClipboard } from "@/lib/utils"
 import {
     zodResolver
 } from "@hookform/resolvers/zod"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { desc, eq } from "drizzle-orm"
 import { useTransition } from "react"
 import {
@@ -25,7 +27,7 @@ import {
     z
 } from "zod"
 import { NavLink } from "."
-import { SeedItemDisplayCard, useGetSupplier } from "./suppliers"
+import { SeedItemDisplayCard, useGetSupplier } from "./seed-suppliers"
 
 const formSchema = z.object({
     supplierId: z.string(),
@@ -43,24 +45,22 @@ const useGetItems = () => {
 }
 
 
+
 const seedItem = async ({ seedQuantity, supplierId }: { supplierId: string; seedQuantity: string }) => {
     if (!supplierId) return { data: null, msg: "supplier id missing!" }
     const [existSupplier] = await db.select().from(supplierTable).where(eq(supplierTable.id, supplierId))
     if (!existSupplier) return { data: null, msg: "supplier not exist!" }
-    const [item] = await db.select({ item_code: itemTable.item_code }).from(itemTable).orderBy(desc(itemTable.item_code))
 
-    const [firstDigit, lastDigit] = item.item_code.split('-')
-    const ld = Number(lastDigit)
-    const maxLength = ld<10?3:(ld>9&&ld<100)?2:1
 
-    
+
+    console.log(`Seeding start`)
     for (let i = 0; i < Number(seedQuantity); i++) {
-        const itemCode = `${firstDigit}-${(ld+1).toString().padStart(maxLength, "0")}`
+        const [item] = await db.select({ item_code: itemTable.item_code }).from(itemTable).orderBy(desc(itemTable.item_code))
+        console.log(item)
+        const item_code = generateItemCode(item ? item.item_code : `01010101-0001`, 1)
         const randomDummyItemIndex = randomInt(0, items.length - 1)
-        const randomItem = items[randomDummyItemIndex]
-        console.log(`Seeding start`)
-        // await db.insert(itemTable).values({ ...randomItem, supplierId: existSupplier.id })
-        console.log(itemCode)
+        const item_description = items[randomDummyItemIndex].item_description
+        await db.insert(itemTable).values({ item_code, item_description, supplierId: existSupplier.id })
     }
 }
 
@@ -69,7 +69,8 @@ const seedItem = async ({ seedQuantity, supplierId }: { supplierId: string; seed
 export default function SeedItemFrom() {
     const [pending, startTransition] = useTransition()
     const { data: suppliers, isSuccess: supIsSuccess } = useGetSupplier()
-    const { data: items, isSuccess: itemIsSuccess, refetch } = useGetItems()
+    const { data: items, isSuccess: itemIsSuccess, refetch, } = useGetItems()
+    const queryClient = useQueryClient()
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -81,6 +82,7 @@ export default function SeedItemFrom() {
         startTransition(
             async () => {
                 await seedItem(values)
+                await queryClient.invalidateQueries({ queryKey: ['get-item'] })
                 console.log(`seeding finish`)
             }
         )
@@ -94,6 +96,9 @@ export default function SeedItemFrom() {
             </View>
         )
     }
+
+
+
 
 
     return (
@@ -159,11 +164,12 @@ export default function SeedItemFrom() {
                     data={items}
                     renderItem={({ item, index }) => (
                         <SeedItemDisplayCard
-                            label={`${item.item_code}  -   #${index}`}
-                            onPress={async () => {
-                                await db.delete(supplierTable).where(eq(supplierTable.id, item.id))
+                            label={`${item.item_code}  -   #${index + 1}`}
+                            onDelete={async () => {
+                                await db.delete(itemTable).where(eq(itemTable.id, item.id))
                                 refetch()
                             }}
+                            onCopy={async () => { await copyToClipboard(item.item_code) }}
                             disabled={false}
 
                         />
