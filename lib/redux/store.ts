@@ -1,11 +1,9 @@
 import { configureStore } from '@reduxjs/toolkit'
-import scannedItemReducer from './slice/scanned-item-slice'
-import scannedItemsReducer from './slice/scanned-items-slice'
+import alertModalReducer from './slice/alert-modal-slice'
 
 export const store = configureStore({
     reducer: {
-        scannedItems: scannedItemsReducer,
-        scannedItem: scannedItemReducer
+        alertModal: alertModalReducer,
     },
 })
 

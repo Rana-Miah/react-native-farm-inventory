@@ -21,7 +21,7 @@ import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
 export default function Index() {
 
   const { success, error } = useMigrations(db, migrations);
-  const { data} = useGetStoredScannedItems()
+  const { data } = useGetStoredScannedItems()
 
   const qs = useQueryClient()
 
@@ -51,7 +51,7 @@ export default function Index() {
         </View>
       </View>
 
-      <Button onPress={async () =>await qs.invalidateQueries({queryKey: ['get-stored-scanned-items']})}>
+      <Button onPress={async () => await qs.invalidateQueries({ queryKey: ['get-stored-scanned-items'] })}>
         <Text>Refetch</Text>
       </Button>
 
@@ -66,6 +66,7 @@ export default function Index() {
               <ScannedItemCard
                 key={item.barcode}
                 item={item}
+                isCollapseAble
               />
             )}
           />

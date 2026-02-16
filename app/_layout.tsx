@@ -7,6 +7,7 @@ import Toast from 'react-native-toast-message';
 
 import StoreProvider from "@/components/provider/redux-store-provider";
 import { queryClient } from "@/lib/tanstack-query/client";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import "./global.css";
 
 
@@ -16,21 +17,23 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <StoreProvider>
-        <Tabs screenOptions={{
-          tabBarLabel: "Home",
-          headerShown: false
-        }}>
-          {rootLayoutScreens.map((screen) => (
-            <Tabs.Screen
-              key={screen.name}
-              name={screen.name}
+        <SafeAreaProvider>
+          <Tabs screenOptions={{
+            tabBarLabel: "Home",
+            headerShown: false
+          }}>
+            {rootLayoutScreens.map((screen) => (
+              <Tabs.Screen
+                key={screen.name}
+                name={screen.name}
 
-              options={screen.options}
-            />
-          ))}
-        </Tabs>
-        <PortalHost />
-        <Toast />
+                options={screen.options}
+              />
+            ))}
+          </Tabs>
+          <PortalHost />
+          <Toast />
+        </SafeAreaProvider>
       </StoreProvider>
     </QueryClientProvider>
   )

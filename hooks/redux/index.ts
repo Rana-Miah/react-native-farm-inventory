@@ -6,6 +6,5 @@ export const useAppDispatch = useDispatch.withTypes<AppDispatch>()
 export const useAppSelector = useSelector.withTypes<RootState>()
 
 
-export const useScannedItems = () => useAppSelector(state => state.scannedItems)
-export const useScannedItem = () => useAppSelector(state => state.scannedItem)
+export const useAlertModal = () => useAppSelector(state => state.alertModal)
 

@@ -1,6 +1,6 @@
 import { db } from "@/drizzle/db"
 import { barcodeTable, itemTable, storedScannedItemTable, unitTable } from "@/drizzle/schema"
-import { desc, eq } from "drizzle-orm"
+import { desc, eq, like, or } from "drizzle-orm"
 
 export const getItemByScanBarcode = async (scannedBarcode: string) => {
     const [itemResponse] = await db
@@ -58,20 +58,31 @@ export const getUnitById = async (id: string) => {
 
 
 
-export const getStoredScannedItems = async () => {
-    const storeScannedItems = await db
+export const getStoredScannedItems = async (query?: string) => {
+    const storeScannedItemsQuery = db
         .select()
         .from(storedScannedItemTable)
         .leftJoin(unitTable, eq(unitTable.id, storedScannedItemTable.unitId))
         .leftJoin(barcodeTable, eq(barcodeTable.id, storedScannedItemTable.barcodeId))
         .leftJoin(itemTable, eq(itemTable.id, barcodeTable.itemId))
-        .orderBy(desc(storedScannedItemTable.createdAt))
 
 
-        
+    if (query) {
+        const words = query.trim().toLowerCase().split(/\s+/);
+
+        storeScannedItemsQuery.where(or(
+            like(barcodeTable.barcode, `%${query}%`),
+            like(itemTable.item_code, `%${query}%`),
+            ...words.map(word => (
+                like(itemTable.item_description, `%${word}%`)
+            ))
+        ))
+    }
+
+    const storedScannedItems = await storeScannedItemsQuery.orderBy(desc(storedScannedItemTable.createdAt))
 
 
-    return storeScannedItems.map(({ barcode, stored_scanned_item, item, unit }) => {
+    return storedScannedItems.map(({ barcode, stored_scanned_item, item, unit }) => {
 
         return {
             storedId: stored_scanned_item.id,
@@ -85,3 +96,4 @@ export const getStoredScannedItems = async () => {
     })
 
 }
+

@@ -19,8 +19,9 @@ export default function ScanItemForm() {
     const [triggerWidth, setTriggerWidth] = React.useState(0)
     const [barcodeInputValue, setBarcodeInputValue] = React.useState<string>("")
     const quantityInputRef = React.useRef<any>(null)
+    const barcodeInputRef = React.useRef<any>(null)
     const qc = useQueryClient()
-    const {refetch}  = useGetStoredScannedItems()
+    const { refetch } = useGetStoredScannedItems()
 
 
     // React-hook-form
@@ -63,8 +64,10 @@ export default function ScanItemForm() {
                 },
             })
 
-        await qc.invalidateQueries({queryKey:['get-stored-scanned-items']})
+        await qc.invalidateQueries({ queryKey: ['get-stored-scanned-items'] })
+        barcodeInputRef.current?.focus()
         refetch()
+        //TODO:Reset form & set barcode input value to ""
     })
 
 
@@ -91,7 +94,7 @@ export default function ScanItemForm() {
                 })
             }
         }
-    }, [data])
+    }, [data, form])
 
 
     return (
@@ -103,6 +106,7 @@ export default function ScanItemForm() {
                     render={({ field }) => (
                         <View className="relative">
                             <InputField
+                                ref={barcodeInputRef}
                                 placeholder="Barcode/Item-Code"
                                 keyboardType="numeric"
                                 returnKeyType="next"
