@@ -4,7 +4,7 @@ import { ScanItemFormData, scanItemFormSchema } from "@/schema/scan-item-form-sc
 import { Feather } from "@expo/vector-icons"
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient } from "@tanstack/react-query"
-import React from "react"
+import React, { useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { TouchableOpacity, View } from "react-native"
 import Toast from "react-native-toast-message"
@@ -18,7 +18,7 @@ export default function ScanItemForm() {
     const [triggerWidth, setTriggerWidth] = React.useState(0)
     const [barcodeInputValue, setBarcodeInputValue] = React.useState<string>("")
     const quantityInputRef = React.useRef<any>(null)
-        const qc =useQueryClient()
+    const qc = useQueryClient()
 
 
     // React-hook-form
@@ -31,11 +31,11 @@ export default function ScanItemForm() {
         },
     })
 
-    const { data} = useScanItem({ barcode: barcodeInputValue, form, quantityRef: quantityInputRef })
+    const { data } = useScanItem({ barcode: barcodeInputValue, form, quantityRef: quantityInputRef })
     const { mutate } = useScanBarcode()
 
     //! handle submit function
-    const onSubmit = form.handleSubmit(value => {
+    const onSubmit = form.handleSubmit(async value => {
         mutate(
             value,
             {
@@ -61,6 +61,7 @@ export default function ScanItemForm() {
                 },
             })
 
+        await qc.invalidateQueries({queryKey:['get-stored-scanned-items']})
     })
 
 
@@ -72,8 +73,22 @@ export default function ScanItemForm() {
             return
         }
         setBarcodeInputValue(code)
-        await qc.invalidateQueries({queryKey:['get-stored-scanned-items']})
+        await qc.invalidateQueries({ queryKey: ['get-stored-scanned-items'] })
     }
+
+    useEffect(() => {
+        if (data?.data) {
+            const defaultUnitId = data.data.unitId;
+            // or data.data.units[0]?.id if multiple units
+
+            if (defaultUnitId) {
+                form.setValue("unitId", defaultUnitId, {
+                    shouldValidate: true,
+                    shouldDirty: true,
+                })
+            }
+        }
+    }, [data])
 
 
     return (
@@ -96,7 +111,7 @@ export default function ScanItemForm() {
                             {/* Clear Button */}
                             {field.value.length > 0 ? (
                                 <View className="absolute right-2.5 top-1/2 -translate-y-1/2">
-                                    <TouchableOpacity onPress={()=>{
+                                    <TouchableOpacity onPress={() => {
                                         form.reset()
                                         setBarcodeInputValue("")
                                     }}>
@@ -119,8 +134,11 @@ export default function ScanItemForm() {
                                         <Select
                                             onValueChange={(option) => { field.onChange(option?.value); console.log(field.value) }}
                                             value={{
-                                                value: field.value, label: (data && data.data ? data.data.units : []).filter(item => item.id === field.value)[0]?.unitName
+                                                value: field.value,
+                                                label: (data?.data?.units ?? [])
+                                                    .find(u => u.id === field.value)?.unitName ?? "Select an unit"
                                             }}
+
                                         >
                                             <SelectTrigger onLayout={(e) => setTriggerWidth(e.nativeEvent.layout.width)}>
                                                 <SelectValue placeholder="UOM" />
@@ -168,7 +186,7 @@ export default function ScanItemForm() {
                         />
                     </View>
                 </View>
-                
+
             </View>
             <Separator className="my-3" />
             <View>
@@ -188,7 +206,7 @@ export default function ScanItemForm() {
 
             </View>
 
-            
+
         </Form>
     )
 }

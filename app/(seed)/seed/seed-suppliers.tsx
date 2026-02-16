@@ -36,14 +36,14 @@ const seedSupplier = async () => {
 export default function SeedItemFrom() {
     const [, startTransition] = useTransition()
     const [, setItems] = useState<any[]>([])
-    const { data, isError } = useGetSupplier()
+    const { data, isError, refetch } = useGetSupplier()
 
     function onSubmit() {
         startTransition(
             async () => {
                 await seedSupplier()
                 console.log('Finish database seeding!');
-
+                refetch()
             }
         )
     }
@@ -72,27 +72,31 @@ export default function SeedItemFrom() {
             </View>
 
 
+            <View className="flex-row gap-2 items-center">
+                <Button onPress={onSubmit} className="flex-1">
+                    <Text>Seed Supplier</Text>
+                </Button>
 
-            <Button onPress={onSubmit}>
-                <Text>Seed Supplier</Text>
-            </Button>
-
-            <View>
-                <FlatList
-                    data={data}
-                    renderItem={({ item }) => (
-                        <SeedItemDisplayCard
-                            label={item.supplierCode}
-                            onDelete={async () => {
-                                await db.delete(supplierTable).where(eq(supplierTable.id, item.id))
-                            }}
-                            onCopy={() => { }}
-                            disabled={data?.length === 5}
-
-                        />
-                    )}
-                />
+                <Button onPress={() => refetch()}>
+                    <Text>Refetch</Text>
+                </Button>
             </View>
+
+
+            <FlatList
+                data={data}
+                renderItem={({ item }) => (
+                    <SeedItemDisplayCard
+                        label={item.supplierCode}
+                        onDelete={async () => {
+                            await db.delete(supplierTable).where(eq(supplierTable.id, item.id))
+                        }}
+                        onCopy={() => { }}
+                        disabled={data?.length === 5}
+
+                    />
+                )}
+            />
         </Container>
     )
 }

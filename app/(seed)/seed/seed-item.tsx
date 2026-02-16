@@ -57,7 +57,7 @@ const seedItem = async ({ seedQuantity, supplierId }: { supplierId: string; seed
     for (let i = 0; i < Number(seedQuantity); i++) {
         const [item] = await db.select({ item_code: itemTable.item_code }).from(itemTable).orderBy(desc(itemTable.item_code))
         console.log(item)
-        const item_code = generateItemCode(item ? item.item_code : `01010101-0001`, 1)
+        const item_code = generateItemCode(item ? item.item_code : `01010101-0000`, 1)
         const randomDummyItemIndex = randomInt(0, items.length - 1)
         const item_description = items[randomDummyItemIndex].item_description
         await db.insert(itemTable).values({ item_code, item_description, supplierId: existSupplier.id })
@@ -159,7 +159,6 @@ export default function SeedItemFrom() {
                 </Button>
             </Form>
 
-            <View>
                 <FlatList
                     data={items}
                     renderItem={({ item, index }) => (
@@ -175,7 +174,6 @@ export default function SeedItemFrom() {
                         />
                     )}
                 />
-            </View>
         </Container>
     )
 }

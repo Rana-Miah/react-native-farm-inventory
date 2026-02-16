@@ -57,6 +57,11 @@ const Seed = () => {
                     Reset Database
                 </Text>
             </Button>
+            <Button size={'sm'} className=" " onPress={dropAllTables}>
+                <Text>
+                    Delete all Data
+                </Text>
+            </Button>
         </View>
     )
 }

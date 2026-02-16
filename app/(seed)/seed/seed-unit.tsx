@@ -62,19 +62,18 @@ const seedUnit = async () => {
             unitName: 'BAG'
         },
     ])
-
-
 }
 
 
 
 export default function SeedUnit() {
     const qc = useQueryClient()
-    const { data, isSuccess } = useGetUnit()
+    const { data, isSuccess, refetch } = useGetUnit()
 
     const handleSeedUnit = async () => {
         await seedUnit()
         await qc.invalidateQueries({ queryKey: ['get-unit'] })
+        refetch()
     }
 
     if (!isSuccess) return (
@@ -89,11 +88,15 @@ export default function SeedUnit() {
                 <NavLink />
             </View>
 
-            <Button onPress={handleSeedUnit}>
-                <Text>Seed Item</Text>
-            </Button>
+            <View className="flex-row gap-2 items-center">
+                <Button onPress={handleSeedUnit} className="flex-1">
+                    <Text>Seed Item</Text>
+                </Button>
+                <Button onPress={()=>refetch()}>
+                    <Text>Refetch</Text>
+                </Button>
+            </View>
 
-            <View>
                 <FlatList
                     data={data}
                     renderItem={({ item, index }) => (
@@ -108,7 +111,6 @@ export default function SeedUnit() {
                         />
                     )}
                 />
-            </View>
         </Container >
     )
 }

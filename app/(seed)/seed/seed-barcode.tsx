@@ -52,14 +52,26 @@ const seedItem = async ({ item_code, seedQuantity }: z.infer<typeof formSchema>)
     const unitLength = units.length - 1
 
     for (let i = 0; i < Number(seedQuantity); i++) {
-        const [barcode] = await db.select({ barcode: barcodeTable.barcode }).from(barcodeTable).orderBy(desc(barcodeTable.barcode))
+        const [barcode] = await db.select({ barcode: barcodeTable.barcode, unitId: barcodeTable.unitId }).from(barcodeTable).orderBy(desc(barcodeTable.barcode))
 
         const lastBarcode = barcode ? (Number(barcode.barcode) + 1).toString() : "6285696558241"
 
         const unitIndex = randomInt(0, unitLength)
-        const unit = units[unitIndex]
+        let unit = units[unitIndex > unitLength ? unitLength : unitIndex]
 
-        console.log({ lastBarcode, barcode });
+        // console.log("=================================================================================================")
+        // console.log({ unitLength, unitIndex })
+        // console.log("=================================================================================================")
+        // console.log({ unit ,unitId:unit.id})
+        // console.log("=================================================================================================")
+        // console.log({ units })
+        // console.log("=================================================================================================")
+
+        while (barcode && unit.id === barcode.unitId) {
+            console.log({ isTrue: unit.id === barcode.unitId })
+            unit = units[randomInt(0, unitLength)]
+            console.log({ isTrue: unit.id === barcode.unitId })
+        }
 
         await db.insert(barcodeTable).values({
             barcode: lastBarcode,
@@ -132,10 +144,11 @@ export default function SeedItemFrom() {
                                 <Input
                                     {...field}
                                     placeholder="Seed Quantity"
-                                    returnKeyType="next"
+                                    returnKeyType="go"
                                     onChangeText={field.onChange}
                                     value={field.value}
                                     editable={!pending}
+                                    onSubmitEditing={()=>onSubmit()}
                                 />
                             </FormControl>
                         </FormItem>
@@ -146,24 +159,22 @@ export default function SeedItemFrom() {
                 </Button>
             </Form>
 
-            <View>
-                <FlatList
-                    data={barcodes}
-                    renderItem={({ item, index }) => (
-                        <SeedItemDisplayCard
-                            label={`${item.barcode}  -   #${index + 1}`}
-                            onDelete={async () => {
-                                await db.delete(barcodeTable).where(eq(barcodeTable.id, item.id))
-                                qc.invalidateQueries({ queryKey: ['seed-barcode'] })
-                            }}
-                            onCopy={async () => { await copyToClipboard(item.barcode) }}
+            <FlatList
+                data={barcodes}
+                renderItem={({ item, index }) => (
+                    <SeedItemDisplayCard
+                        label={`${item.barcode}  -   #${index + 1}`}
+                        onDelete={async () => {
+                            await db.delete(barcodeTable).where(eq(barcodeTable.id, item.id))
+                            qc.invalidateQueries({ queryKey: ['seed-barcode'] })
+                        }}
+                        onCopy={async () => { await copyToClipboard(item.barcode) }}
 
-                            disabled={false}
+                        disabled={false}
 
-                        />
-                    )}
-                />
-            </View>
+                    />
+                )}
+            />
         </Container>
     )
 }
