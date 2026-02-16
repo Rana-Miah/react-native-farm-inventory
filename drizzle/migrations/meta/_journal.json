@@ -15,6 +15,13 @@
       "when": 1771156129796,
       "tag": "0001_organic_red_wolf",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1771229431459,
+      "tag": "0002_gray_ultimo",
+      "breakpoints": true
     }
   ]
 }

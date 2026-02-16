@@ -21,7 +21,7 @@ export const relationBetween = <T extends string>(bothTableName: OneComma<T>) =>
     return `relation between ${firstTable} and ${secondTable}`
 }
 
-export const itemTable = sqliteTable("itemTable", {
+export const itemTable = sqliteTable("item", {
     id: text('id').primaryKey().notNull().unique().$defaultFn(() => uuid()),
     supplierId: text('supplier_id').notNull().references(() => supplierTable.id),
     item_code: text('item_code').notNull().unique(),
