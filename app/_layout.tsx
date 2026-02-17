@@ -102,4 +102,14 @@ const rootLayoutScreens: RootLayoutScreens[] = [
       )
     },
   },
+  {
+    name: "seed",
+
+    options: {
+      tabBarLabel: "Seed",
+      tabBarIcon: ({ color, size }) => (
+        <FontAwesome6 name="seedling" size={size} color={color} />
+      )
+    },
+  },
 ]

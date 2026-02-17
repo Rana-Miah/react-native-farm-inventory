@@ -4,9 +4,7 @@ const SeedLayout = ()=>{
 
     return(
 
-        <Stack screenOptions={{
-            headerShown:false
-        }}/>
+        <Stack />
     )
 }
 
