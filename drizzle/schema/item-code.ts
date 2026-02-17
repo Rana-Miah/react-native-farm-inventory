@@ -70,6 +70,7 @@ export const barcodeTable = sqliteTable('barcode', {
     id: text('id').primaryKey().notNull().unique().$defaultFn(() => uuid()),
     barcode: text('barcode').notNull().unique(),
     price: real('price').notNull(),
+    promoPrice: real('promo_price'),
     description: text('description'),
     itemId: text('item_code_id').notNull().references(() => itemTable.id),
     unitId: text('unit_id').notNull().references(() => unitTable.id),

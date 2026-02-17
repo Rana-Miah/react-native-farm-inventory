@@ -2,6 +2,7 @@ CREATE TABLE `barcode` (
 	`id` text PRIMARY KEY NOT NULL,
 	`barcode` text NOT NULL,
 	`price` real NOT NULL,
+	`promo_price` real,
 	`description` text,
 	`item_code_id` text NOT NULL,
 	`unit_id` text NOT NULL,

@@ -125,10 +125,7 @@ export function PriceCheckCard({
                                 </Badge>
                             </View>
 
-                            <Text
-                                className="text-sm font-medium text-foreground"
-                                numberOfLines={0}   // allow unlimited lines
-                            >
+                            <Text className="text-sm font-medium text-foreground">
                                 {supplierName}
                             </Text>
                         </View>

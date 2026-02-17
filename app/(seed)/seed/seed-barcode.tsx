@@ -44,6 +44,26 @@ const useGetBarcode = () => {
 }
 
 
+
+function generatePromoPriceWithCheck(regularPrice: number) {
+    if (regularPrice <= 0) throw new Error("Regular price must be greater than 0");
+
+    // Step 1: random number between 1 and 10
+    const randomNum = Math.floor(Math.random() * 10) + 1;
+
+    // Step 2: check if even
+    const isEven = randomNum % 2 === 0;
+
+    // Step 3: generate promo price less than regularPrice
+    const promoPrice = Number((Math.random() * (regularPrice - 0.01) + 0.01).toFixed(2));
+
+    // Step 4: return
+    return { promoPrice, isEven };
+}
+
+
+
+
 const seedItem = async ({ item_code, seedQuantity }: z.infer<typeof formSchema>) => {
     const [item] = await db.select({ id: itemTable.id, description: itemTable.item_description }).from(itemTable).where(eq(itemTable.item_code, item_code))
     if (!item) return { data: null, msg: "Item not exist!" }
@@ -53,11 +73,13 @@ const seedItem = async ({ item_code, seedQuantity }: z.infer<typeof formSchema>)
 
     for (let i = 0; i < Number(seedQuantity); i++) {
         const [barcode] = await db.select({ barcode: barcodeTable.barcode, unitId: barcodeTable.unitId }).from(barcodeTable).orderBy(desc(barcodeTable.barcode))
-
         const lastBarcode = barcode ? (Number(barcode.barcode) + 1).toString() : "6285696558241"
 
         const unitIndex = randomInt(0, unitLength)
         let unit = units[unitIndex > unitLength ? unitLength : unitIndex]
+        const price = randomPrice()
+        const { isEven, promoPrice } = generatePromoPriceWithCheck(price)
+
 
         // console.log("=================================================================================================")
         // console.log({ unitLength, unitIndex })
@@ -68,15 +90,14 @@ const seedItem = async ({ item_code, seedQuantity }: z.infer<typeof formSchema>)
         // console.log("=================================================================================================")
 
         while (barcode && unit.id === barcode.unitId) {
-            console.log({ isTrue: unit.id === barcode.unitId })
             unit = units[randomInt(0, unitLength)]
-            console.log({ isTrue: unit.id === barcode.unitId })
         }
 
         await db.insert(barcodeTable).values({
             barcode: lastBarcode,
             itemId: item.id,
-            price: randomPrice(),
+            price,
+            promoPrice: isEven ? promoPrice : null,
             unitId: unit.id,
             description: item.description
         })
@@ -146,7 +167,7 @@ export default function SeedItemFrom() {
                                     returnKeyType="go"
                                     onChangeText={field.onChange}
                                     value={field.value}
-                                    onSubmitEditing={()=>onSubmit()}
+                                    onSubmitEditing={() => onSubmit()}
                                 />
                             </FormControl>
                         </FormItem>
@@ -161,7 +182,7 @@ export default function SeedItemFrom() {
                 data={barcodes}
                 renderItem={({ item, index }) => (
                     <SeedItemDisplayCard
-                        label={`${item.barcode}  -   #${index + 1}`}
+                        label={`${item.barcode} ${item.promoPrice??"null"}  #${index + 1}`}
                         onDelete={async () => {
                             await db.delete(barcodeTable).where(eq(barcodeTable.id, item.id))
                             qc.invalidateQueries({ queryKey: ['seed-barcode'] })

@@ -1,4 +1,4 @@
-import { getItemByScanBarcode, getStoredScannedItems } from "@/data-access-layer/get-item"
+import { getItemByBarcode, getItemByScanBarcode, getStoredScannedItems } from "@/data-access-layer/get-item"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 
 
@@ -7,6 +7,14 @@ export const useGetItemByBarcode = (barcode: string) => {
     return useQuery({
         queryKey: ['get-item-by-barcode', barcode],
         queryFn: () => getItemByScanBarcode(barcode),
+        enabled: !!barcode
+    })
+}
+
+export const useGetItemPriceByBarcode = (barcode: string) => {
+    return useQuery({
+        queryKey: ['get-item-price-by-barcode', barcode],
+        queryFn: () => getItemByBarcode(barcode),
         enabled: !!barcode
     })
 }

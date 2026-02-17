@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "2b9d8db7-31c9-476d-bcb9-f15f6fdb573e",
+  "id": "37f67141-21e0-4b7b-8cc9-b65c85eb3ee0",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "barcode": {
@@ -26,6 +26,13 @@
           "type": "real",
           "primaryKey": false,
           "notNull": true,
+          "autoincrement": false
+        },
+        "promo_price": {
+          "name": "promo_price",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false,
           "autoincrement": false
         },
         "description": {

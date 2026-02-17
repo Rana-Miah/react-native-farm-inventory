@@ -1,5 +1,5 @@
 import { db } from "@/drizzle/db"
-import { barcodeTable, itemTable, storedScannedItemTable, unitTable } from "@/drizzle/schema"
+import { barcodeTable, itemTable, storedScannedItemTable, supplierTable, unitTable } from "@/drizzle/schema"
 import { desc, eq, like, or } from "drizzle-orm"
 
 export const getItemByScanBarcode = async (scannedBarcode: string) => {
@@ -94,6 +94,39 @@ export const getStoredScannedItems = async (query?: string) => {
             unitPacking: unit?.packing,
         }
     })
+
+}
+
+
+
+
+
+export const getItemByBarcode = async (barcode: string) => {
+    const storedScannedItems = await db
+        .select()
+        .from(barcodeTable)
+        .leftJoin(unitTable, eq(unitTable.id, barcodeTable.unitId))
+        .leftJoin(itemTable, eq(itemTable.id, barcodeTable.itemId))
+        .leftJoin(supplierTable, eq(supplierTable.id, itemTable.supplierId))
+        .where(eq(barcodeTable.barcode, barcode))
+
+
+    const [item] = storedScannedItems.map(({ barcode, supplier, item, unit }) => {
+
+        return {
+            barcode: barcode?.barcode,
+            item_code: item?.item_code,
+            description: item?.item_description,
+            unitName: unit?.unitName,
+            unitPacking: unit?.packing,
+            price:barcode.price,
+            promoPrice:barcode.promoPrice,
+            supplierName:supplier?.supplierName,
+            supplierCode:supplier?.supplierCode
+        }
+    })
+
+    return item
 
 }
 

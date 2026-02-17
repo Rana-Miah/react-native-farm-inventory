@@ -21,7 +21,7 @@ export default function ScanItemForm() {
     const quantityInputRef = React.useRef<any>(null)
     const barcodeInputRef = React.useRef<any>(null)
     const qc = useQueryClient()
-    const { refetch, } = useGetStoredScannedItems()
+    const { refetch } = useGetStoredScannedItems()
 
 
     // React-hook-form
