@@ -62,19 +62,29 @@ const ScannedItemCard = ({ item, enableActionBtn, isCollapseAble, defaultCollaps
     }, [isEditState, item.quantity, form])
 
     return (
-        <Card className='bg-white border-muted my-0.5 p-2 gap-4'>
+        <Card className='bg-white border-muted my-0.5 p-2 gap-4' >
             <TouchableOpacity onPress={() => setIsCollapsed(prev => !prev)}>
                 <CardHeader className='flex-row items-center justify-between px-0'>
-                    <View>
+                    <View className='w-2/3'>
+                        <View className='flex-row items-center gap-1'>
                         <CardTitle className='text-black'>
                             BARCODE
                         </CardTitle>
-                        <CardDescription className='text-black'>
-                            {item.barcode}
-                        </CardDescription>
+
+                            {(item.scanFor||true)&&(
+                                <Badge  variant={'outline'} className='sha'>
+                                    <Text>{item.scanFor||"Order"}</Text>
+                                </Badge>
+                            )}
+                        </View>
+
+                            <CardDescription className='text-black'>
+                                {item.barcode}
+                            </CardDescription>
+
                     </View>
 
-                    <View className="flex-row items-center gap-2 px-0">
+                    <View >
                         {enableActionBtn ? (
                             <>
 
@@ -112,13 +122,13 @@ const ScannedItemCard = ({ item, enableActionBtn, isCollapseAble, defaultCollaps
                                 <View className="flex-1">
                                     <DetailsRow icon={{ library: 'FontAwesome', name: 'hashtag' }} label='item code' value={item.item_code ?? "N/A"} />
                                 </View>
-                                <Button className='flex-row items-center gap-1' size={'sm'} onPress={async () => {
+                                <Button variant={'outline'} className='flex-row items-center gap-1' size={'sm'} onPress={async () => {
                                     await copyToClipboard(item.barcode ?? "")
                                 }}>
-                                    <Text className='text-white'>
-                                        <FontAwesome6 name='copy' color="#fff" />
+                                    <Text className='text-muted-foreground'>
+                                        <FontAwesome6 name='copy' color="#000" />
                                     </Text>
-                                    <Text className='text-white'>
+                                    <Text className='text-black'>
                                         Barcode
                                     </Text>
                                 </Button>
@@ -144,7 +154,7 @@ const ScannedItemCard = ({ item, enableActionBtn, isCollapseAble, defaultCollaps
                                                 <Controller
                                                     control={form.control}
                                                     name="quantity"
-                                                    render={({ field: { onChange, onBlur, value } }) => (
+                                                    render={({ field: { onChange, value } }) => (
                                                         <Input
                                                             ref={quantityRef}
                                                             className="h-8 w-28" // same height & width as badge
@@ -174,6 +184,7 @@ const ScannedItemCard = ({ item, enableActionBtn, isCollapseAble, defaultCollaps
                     </>
                 )
             }
+            
         </Card>
     )
 }
@@ -188,8 +199,8 @@ type ItemQuantityUnitProps = {
 
 const ItemQuantityUnit = ({ quantity, uom, ...props }: ItemQuantityUnitProps) => {
     return (
-        <Badge variant="outline" className="border-muted-foreground rounded-full px-2.5">
-            <Text {...props} className='text-center text-sm font-bold'>{quantity} - {uom.toUpperCase()}</Text>
+        <Badge variant="outline" className="rounded-full px-2.5">
+            <Text {...props} className='text-center text-sm '>{quantity} - {uom.toUpperCase()}</Text>
         </Badge>
     )
 }

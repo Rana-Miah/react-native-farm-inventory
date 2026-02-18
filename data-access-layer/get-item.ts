@@ -92,6 +92,7 @@ export const getStoredScannedItems = async (query?: string) => {
             description: item?.item_description,
             unitName: unit?.unitName,
             unitPacking: unit?.packing,
+            scanFor:stored_scanned_item.scanFor
         }
     })
 

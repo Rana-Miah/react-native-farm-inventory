@@ -1,0 +1,1 @@
+ALTER TABLE `stored_scanned_item` ADD `scan_for` text;

@@ -1,8 +1,9 @@
 import InputField from '@/components/input-field'
-import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
+import { Form, FormControl, FormDescription, FormField, FormItem } from '@/components/ui/form'
 import { multitaskVariantValues } from '@/constants'
 import { cn } from '@/lib/utils'
 import { advanceInventoryFormSchema, AdvanceInventoryFormValue } from '@/schema/advance-inventory-form-schema'
+import { FontAwesome6 } from '@expo/vector-icons'
 import { zodResolver } from '@hookform/resolvers/zod'
 import React from 'react'
 import { useForm } from 'react-hook-form'
@@ -91,16 +92,17 @@ const AdvanceInventoryForm = () => {
                     name='scannedFor'
                     render={({ field }) => (
                         <FormItem>
+                            <Label>Scan for</Label>
                             <FormControl>
-                                <RadioGroup value={field.value} onValueChange={field.onChange} className='flex-row '>
+                                <RadioGroup value={field.value} onValueChange={field.onChange} className='flex-row gap-0'>
                                     {
                                         multitaskVariantValues.map(
                                             variant => {
                                                 const isActive = form.getValues('scannedFor') === variant
                                                 return (
-                                                    <Pressable onPress={() => field.onChange(variant)} key={variant} className={cn('flex-1  rounded-md', isActive ? 'bg-black' : "")}>
-                                                        <Text className=' py-2 text-center  '>
-                                                            <Label htmlFor="r1" className={cn('text-black font-semibold', isActive ? "text-white" : "")}>{variant}</Label>
+                                                    <Pressable onPress={() => field.onChange(variant)} key={variant} className={cn('flex-1 rounded-md', isActive ? 'bg-black' : "")}>
+                                                        <Text className={cn('py-2 text-center font-semibold',isActive&&"text-white")}>
+                                                            {variant}  {isActive&&<FontAwesome6 name='check' color="#fff" size={14} />}
                                                         </Text>
                                                     </Pressable>
                                                 )
@@ -109,13 +111,18 @@ const AdvanceInventoryForm = () => {
                                     }
                                 </RadioGroup>
                             </FormControl>
+                            <FormDescription>
+                               By using this feature merchandiser can scan multi type inventory at the same time. Like <Text className='font-semibold text-sm'>Inventory, Shelf tags, Order</Text>
+                            </FormDescription>
                         </FormItem>
                     )}
                 />
-
             </View>
         </Form>
     )
 }
+
+
+
 
 export default AdvanceInventoryForm

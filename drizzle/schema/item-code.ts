@@ -1,3 +1,4 @@
+import { multitaskVariantValues } from "@/constants";
 import { relations } from "drizzle-orm";
 import { integer, real, sqliteTable, text, } from "drizzle-orm/sqlite-core";
 import { v4 as uuid } from 'uuid';
@@ -99,6 +100,7 @@ export const storedScannedItemTable = sqliteTable('stored_scanned_item', {
     barcodeId: text('barcode_id').notNull().references(() => barcodeTable.id),
     unitId:text('unit_id').notNull().references(() => unitTable.id),
     quantity: real('quantity').notNull(),
+    scanFor:text("scan_for",{enum:multitaskVariantValues}),
     createdAt:createdAt(),
     updatedAt:updatedAt()
 })

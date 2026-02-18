@@ -11,7 +11,6 @@ import migrations from "@/drizzle/migrations/migrations";
 
 import { EmptyState } from '@/components/empty-state';
 import ScanItemForm from '@/components/form/scan-item-form';
-import { Button } from '@/components/ui/button';
 import { Text } from "@/components/ui/text";
 import { useGetStoredScannedItems } from '@/hooks/tanstack-query/item-query';
 import { Feather } from '@expo/vector-icons';
@@ -51,10 +50,6 @@ export default function Index() {
 
         </View>
       </View>
-
-      <Button onPress={async () => await qs.invalidateQueries({ queryKey: ['get-stored-scanned-items'] })}>
-        <Text>Refetch</Text>
-      </Button>
 
       {/* scanned items */}
       {

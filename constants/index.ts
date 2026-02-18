@@ -1,10 +1,17 @@
 export const ITEM_CODE_REGEX = /^0\d{7}-\d{4}$/
 export const valueIsItemCode = (code: string) => ITEM_CODE_REGEX.test(code)
 
+
+export const multitaskVariantValues = ['Inventory','Tags','Order',] as const
+
 export const multitaskVariants = [
     {
         label: 'Inventory',
         value: 'Inventory'
+    },
+    {
+        label: 'Tags',
+        value: 'Tags'
     },
     {
         label: 'Order',
@@ -13,7 +20,6 @@ export const multitaskVariants = [
 
 ] as const
 
-export const multitaskVariantValues = [...multitaskVariants.map(mv => mv.value)] as const
 
 export const items = [
     {
