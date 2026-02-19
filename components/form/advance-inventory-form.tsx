@@ -1,9 +1,10 @@
 import InputField from '@/components/input-field'
 import { Form, FormControl, FormDescription, FormField, FormItem } from '@/components/ui/form'
 import { multitaskVariantValues } from '@/constants'
+import { useCountDown } from '@/hooks/use-count-down'
 import { cn } from '@/lib/utils'
 import { advanceInventoryFormSchema, AdvanceInventoryFormValue } from '@/schema/advance-inventory-form-schema'
-import { FontAwesome6 } from '@expo/vector-icons'
+import { Feather, FontAwesome6 } from '@expo/vector-icons'
 import { zodResolver } from '@hookform/resolvers/zod'
 import React from 'react'
 import { useForm } from 'react-hook-form'
@@ -14,7 +15,7 @@ import { Text } from '../ui/text'
 
 
 const AdvanceInventoryForm = () => {
-
+    const { isTimerFinish, seconds, startTimer } = useCountDown(5)
     const form = useForm<AdvanceInventoryFormValue>({
         resolver: zodResolver(advanceInventoryFormSchema),
         defaultValues: {
@@ -92,7 +93,15 @@ const AdvanceInventoryForm = () => {
                     name='scannedFor'
                     render={({ field }) => (
                         <FormItem>
-                            <Label>Scan for</Label>
+
+                            <View className='flex-row items-center justify-between'>
+                                <Label className="font-semibold">Scan For</Label>
+                                <Pressable onPress={startTimer}>
+                                    <Text className="">
+                                        <Feather name='info' size={20} />
+                                    </Text>
+                                </Pressable>
+                            </View>
                             <FormControl>
                                 <RadioGroup value={field.value} onValueChange={field.onChange} className='flex-row gap-0'>
                                     {
@@ -101,8 +110,8 @@ const AdvanceInventoryForm = () => {
                                                 const isActive = form.getValues('scannedFor') === variant
                                                 return (
                                                     <Pressable onPress={() => field.onChange(variant)} key={variant} className={cn('flex-1 rounded-md', isActive ? 'bg-black' : "")}>
-                                                        <Text className={cn('py-2 text-center font-semibold',isActive&&"text-white")}>
-                                                            {variant}  {isActive&&<FontAwesome6 name='check' color="#fff" size={14} />}
+                                                        <Text className={cn('py-2 text-center font-semibold', isActive && "text-white")}>
+                                                            {variant}  {isActive && <FontAwesome6 name='check' color="#fff" size={14} />}
                                                         </Text>
                                                     </Pressable>
                                                 )
@@ -111,9 +120,13 @@ const AdvanceInventoryForm = () => {
                                     }
                                 </RadioGroup>
                             </FormControl>
-                            <FormDescription>
-                               By using this feature merchandiser can scan multi type inventory at the same time. Like <Text className='font-semibold text-sm'>Inventory, Shelf tags, Order</Text>
-                            </FormDescription>
+                            {
+                                !isTimerFinish && (
+                                    <FormDescription>
+                                        By using this feature merchandiser can scan multi type inventory at the same time. Like <Text className='font-semibold text-sm'>Inventory, Shelf tags, Order</Text>
+                                    </FormDescription>
+                                )
+                            }
                         </FormItem>
                     )}
                 />

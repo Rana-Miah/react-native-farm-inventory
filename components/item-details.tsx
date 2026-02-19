@@ -17,6 +17,7 @@ type ScannedItemCardProps = {
         unit: string,
         item_code: string,
         description: string
+        isAlreadyScanned: boolean
     }
 }
 

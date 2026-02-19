@@ -83,6 +83,7 @@ export default function SeedItemFrom() {
             async () => {
                 await seedItem(values)
                 await queryClient.invalidateQueries({ queryKey: ['get-item'] })
+                refetch()
                 console.log(`seeding finish`)
             }
         )
@@ -159,21 +160,21 @@ export default function SeedItemFrom() {
                 </Button>
             </Form>
 
-                <FlatList
-                    data={items}
-                    renderItem={({ item, index }) => (
-                        <SeedItemDisplayCard
-                            label={`${item.item_code}  -   #${index + 1}`}
-                            onDelete={async () => {
-                                await db.delete(itemTable).where(eq(itemTable.id, item.id))
-                                refetch()
-                            }}
-                            onCopy={async () => { await copyToClipboard(item.item_code) }}
-                            disabled={false}
+            <FlatList
+                data={items}
+                renderItem={({ item, index }) => (
+                    <SeedItemDisplayCard
+                        label={`${item.item_code}  -   #${index + 1}`}
+                        onDelete={async () => {
+                            await db.delete(itemTable).where(eq(itemTable.id, item.id))
+                            refetch()
+                        }}
+                        onCopy={async () => { await copyToClipboard(item.item_code) }}
+                        disabled={false}
 
-                        />
-                    )}
-                />
+                    />
+                )}
+            />
         </Container>
     )
 }

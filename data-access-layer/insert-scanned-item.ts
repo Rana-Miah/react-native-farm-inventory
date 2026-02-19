@@ -15,14 +15,6 @@ export const insertScannedItem = async (payload: ScanItemFormData) => {
         unitId: existUnit.id
     }).returning()
 
-
-    console.log({
-        barcodeId: existBarcode.id,
-        quantity: payload.quantity,
-        unitId: existUnit.id
-    })
-
-
     return {
         msg: "Item Added",
         data: addedItem

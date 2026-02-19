@@ -80,15 +80,6 @@ const seedItem = async ({ item_code, seedQuantity }: z.infer<typeof formSchema>)
         const price = randomPrice()
         const { isEven, promoPrice } = generatePromoPriceWithCheck(price)
 
-
-        // console.log("=================================================================================================")
-        // console.log({ unitLength, unitIndex })
-        // console.log("=================================================================================================")
-        // console.log({ unit ,unitId:unit.id})
-        // console.log("=================================================================================================")
-        // console.log({ units })
-        // console.log("=================================================================================================")
-
         while (barcode && unit.id === barcode.unitId) {
             unit = units[randomInt(0, unitLength)]
         }
@@ -108,7 +99,7 @@ const seedItem = async ({ item_code, seedQuantity }: z.infer<typeof formSchema>)
 
 export default function SeedItemFrom() {
     const [pending, startTransition] = useTransition()
-    const { data: barcodes, isSuccess: barcodeIsSuccess } = useGetBarcode()
+    const { data: barcodes, isSuccess: barcodeIsSuccess, refetch } = useGetBarcode()
     const qc = useQueryClient()
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -123,6 +114,7 @@ export default function SeedItemFrom() {
             async () => {
                 await seedItem(values)
                 await qc.invalidateQueries({ queryKey: ['seed-barcode'] })
+                refetch()
             }
         )
     })
@@ -182,7 +174,7 @@ export default function SeedItemFrom() {
                 data={barcodes}
                 renderItem={({ item, index }) => (
                     <SeedItemDisplayCard
-                        label={`${item.barcode} ${item.promoPrice??"null"}  #${index + 1}`}
+                        label={`${item.barcode} ${item.promoPrice ?? "null"}  #${index + 1}`}
                         onDelete={async () => {
                             await db.delete(barcodeTable).where(eq(barcodeTable.id, item.id))
                             qc.invalidateQueries({ queryKey: ['seed-barcode'] })
