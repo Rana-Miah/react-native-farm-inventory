@@ -177,3 +177,94 @@ export const getItemByBarcode = async (barcode: string) => {
 export type StoredItem = NonNullable<Awaited<ReturnType<typeof getStoredScannedItems>>>[number]
 
 
+
+/**
+ *TODO: Remove this fn and organize you code
+ * @param param0 
+ * @returns 
+ */
+
+export const getItemDetailsByBarcodeWithAdvanceFeture = async (
+    { scanFor, isAdvanceModeEnable, barcode: scannedBarcode }: {
+        barcode: string;
+        scanFor: typeof multitaskVariantValues[number] | undefined;
+        isAdvanceModeEnable: boolean;
+    }) => {
+
+    consoleLog({ scanFor, isAdvanceModeEnable, scannedBarcode })
+
+    const [itemResponse] = await db
+        .select()
+        .from(barcodeTable)
+        .innerJoin(unitTable, eq(unitTable.id, barcodeTable.unitId))
+        .innerJoin(itemTable, eq(itemTable.id, barcodeTable.itemId))
+        .where(eq(barcodeTable.barcode, scannedBarcode))
+
+    if (!itemResponse || !itemResponse.barcode || !itemResponse.unit) return (
+        {
+            msg: 'Item not found!',
+            data: null
+        }
+    )
+
+    const { barcode, item, unit } = itemResponse
+
+    const barcodeUnits = await db
+        .select()
+        .from(barcodeTable)
+        .rightJoin(unitTable, eq(unitTable.id, barcodeTable.unitId))
+        .where(eq(barcodeTable.itemId, item.id))
+
+    const units = barcodeUnits.map(({ unit }) => {
+        const { createdAt, updatedAt, ...rest } = unit
+        return {
+            ...rest
+        }
+    })
+
+    //! GET ALREADY SCANNED ITEM
+
+    /**
+     * advance feature implement
+     * 
+     * 1. is advance mode on
+     * 2. is scan for order
+     * 3. is there are any storedItems that already scanned for order
+     * 4. if exist return the stored data
+     * 
+     */
+    const isScanForOrder = isAdvanceModeEnable && scanFor === 'Order'
+
+    const storedItemsByItemCode = await db.select().from(storedScannedItemTable)
+        .innerJoin(itemTable, eq(itemTable.id, barcodeTable.itemId))
+        .rightJoin(barcodeTable, eq(barcodeTable.id, storedScannedItemTable.barcodeId))
+        .where(and(
+            eq(itemTable.item_code, item.item_code),
+            eq(storedScannedItemTable.scanFor, 'Order'),
+        ))
+
+    const hasStoredItems = storedItemsByItemCode.length > 0
+
+    const isAlreadyScanned = storedItemsByItemCode.some(({ stored_scanned_item, }) => stored_scanned_item?.scanFor === 'Order')
+
+
+    const data = {
+        ...item,
+        ...barcode,
+        ...unit,
+        units
+    }
+
+    if (isScanForOrder && hasStoredItems && isAlreadyScanned) {
+        const [existStored] = storedItemsByItemCode
+        return {
+            ...data,
+            storedId: existStored?.stored_scanned_item?.id
+        }
+    }
+
+    return {
+        msg: 'item found',
+        data
+    }
+}
