@@ -1,14 +1,14 @@
 import { db } from "@/drizzle/db"
 import { barcodeTable, itemTable, storedScannedItemTable, supplierTable, unitTable } from "@/drizzle/schema"
 import { consoleLog } from "@/lib/log"
-import { desc, eq, like, or } from "drizzle-orm"
+import { and, desc, eq, like, or } from "drizzle-orm"
 
 export const getItemByScanBarcode = async (scannedBarcode: string) => {
     const [itemResponse] = await db
         .select()
         .from(barcodeTable)
-        .rightJoin(unitTable, eq(unitTable.id, barcodeTable.unitId))
-        .rightJoin(itemTable, eq(itemTable.id, barcodeTable.itemId))
+        .innerJoin(unitTable, eq(unitTable.id, barcodeTable.unitId))
+        .innerJoin(itemTable, eq(itemTable.id, barcodeTable.itemId))
         .where(eq(barcodeTable.barcode, scannedBarcode))
 
     if (!itemResponse || !itemResponse.barcode || !itemResponse.unit) return (
@@ -19,16 +19,6 @@ export const getItemByScanBarcode = async (scannedBarcode: string) => {
     )
 
     const { barcode, item, unit } = itemResponse
-
-
-    const [existStored] = await db.select()
-        .from(storedScannedItemTable)
-        .leftJoin(barcodeTable, eq(barcodeTable.id, storedScannedItemTable.barcodeId))
-        .leftJoin(itemTable, eq(itemTable.id, barcode.itemId))
-        .where(eq(itemTable.item_code, item.item_code))
-
-
-    consoleLog({ existStored })
 
     const barcodeUnits = await db
         .select()
@@ -42,6 +32,35 @@ export const getItemByScanBarcode = async (scannedBarcode: string) => {
             ...rest
         }
     })
+
+    //! GET ALREADY SCANNED ITEM
+
+    /**
+     * advance feature implement
+     * 
+     * 1. is advance mode on
+     * 2. is scan for order
+     * 3. is there are any storedItems that already scanned for order
+     * 4. if exist return the stored data
+     * 
+     */
+
+    const storedItemsByItemCode = await db.select().from(storedScannedItemTable)
+    .innerJoin(itemTable,eq(itemTable.id,barcodeTable.itemId))
+    .rightJoin(barcodeTable,eq(barcodeTable.id,storedScannedItemTable.barcodeId))
+    .where(and(
+        eq(itemTable.item_code,item.item_code),
+        eq(storedScannedItemTable.scanFor,'Order'),
+    ))
+
+    const isAlreadyScanned = storedItemsByItemCode.some(({stored_scanned_item,}) =>{
+        const isScannedForOrder = stored_scanned_item?.scanFor === 'Order'
+
+    })
+    const [existStored] = storedItemsByItemCode
+
+    consoleLog({ existStored,storedLength:storedItemsByItemCode.length })
+
 
 
     const data = {

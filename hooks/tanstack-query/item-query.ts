@@ -7,7 +7,7 @@ export const useGetItemByBarcode = (barcode: string) => {
     return useQuery({
         queryKey: ['get-item-by-barcode', barcode],
         queryFn: () => getItemByScanBarcode(barcode),
-        enabled: !!barcode
+        enabled: !!barcode,
     })
 }
 
