@@ -1,7 +1,10 @@
 import { multitaskVariantValues } from '@/constants'
+import { useGetStoredScannedItems } from '@/hooks/tanstack-query/item-query'
+import { useGetItemDetailsMutaitonWithFeature } from '@/hooks/tanstack-query/mutation/get-item-details-mutation'
 import { useScanBarcode } from "@/hooks/tanstack-query/scanned-item-mutation"
 import { useCountDown } from "@/hooks/use-count-down"
-import { useScanItem } from "@/hooks/use-scan-item"
+import { consoleLog } from '@/lib/log'
+import { getSecureStoreValueFor, saveIntoSecureStore } from '@/lib/secure-store'
 import { cn } from '@/lib/utils'
 import { ScanItemFormData, scanItemFormSchema } from "@/schema/scan-item-form-schema"
 import { Feather, FontAwesome6 } from "@expo/vector-icons"
@@ -30,14 +33,15 @@ export default function ScanItemForm() {
     const quantityInputRef = React.useRef<any>(null)
     const barcodeInputRef = React.useRef<any>(null)
     const qc = useQueryClient()
-
+    const {mutate:getItemDetailsMutation,data:itemDetails,reset:resetItemDetailsMutation}=useGetItemDetailsMutaitonWithFeature()
+    const {refetch:refetchStoredItems} = useGetStoredScannedItems()
 
     // React-hook-form
     const form = useForm<ScanItemFormData>({
         resolver: zodResolver(scanItemFormSchema),
         defaultValues: {
             barcode: "",
-            unitId: "",
+            unitId: itemDetails?.data?.unitId??"",
             quantity: 1,
             isAdvanceModeEnable: false,
             scanFor: undefined
@@ -45,13 +49,7 @@ export default function ScanItemForm() {
     })
     const isAdvanceModeEnable = form.watch('isAdvanceModeEnable')
     const scanFor = form.watch('scanFor')
-    const { data, refetch } = useScanItem({
-        form,
-        scanFor,
-        isAdvanceModeEnable,
-        barcode: barcodeInputValue,
-        quantityRef: quantityInputRef,
-    })
+    
     const { mutate } = useScanBarcode()
 
 
@@ -72,8 +70,8 @@ export default function ScanItemForm() {
                         type: 'success',
                         text1: msg,
                     })
-                    refetch()
-
+                    refetchStoredItems()
+                    resetItemDetailsMutation()
                 },
             })
         barcodeInputRef.current?.focus()
@@ -86,14 +84,29 @@ export default function ScanItemForm() {
             form.setValue('unitId', "")
             return
         }
-        setBarcodeInputValue(code)
-        await qc.invalidateQueries({ queryKey: ['get-stored-scanned-items'] })
-        refetch()
+        getItemDetailsMutation(
+            {
+                barcode: code,
+                isAdvanceModeEnable,
+                scanFor
+            },
+            {
+                onSuccess(data) {
+                    if (data.data) {
+                        Toast.show({
+                            type: 'success',
+                            text1:"item found by mutation"
+                        })
+                        return
+                    }
+                }
+            }
+        )
     }
 
     useEffect(() => {
-        if (data?.data) {
-            const defaultUnitId = data.data.unitId;
+        if (itemDetails?.data) {
+            const defaultUnitId = itemDetails.data.unitId;
             // or data.data.units[0]?.id if multiple units
 
             if (defaultUnitId) {
@@ -103,8 +116,10 @@ export default function ScanItemForm() {
                 })
             }
         }
-    }, [data, form])
+    }, [itemDetails, form])
 
+
+    consoleLog({itemDetails})
 
     return (
 
@@ -131,8 +146,11 @@ export default function ScanItemForm() {
                                 {/* Clear Button */}
                                 {field.value.length > 0 ? (
                                     <View className="absolute right-2.5 top-1/2 -translate-y-1/2">
-                                        <TouchableOpacity onPress={() => {
+                                        <TouchableOpacity onPress={async() => {
+                                            const isAdvanceModeEnable = await getSecureStoreValueFor<boolean>('isAdvanceModeEnable')
                                             form.reset()
+                                            resetItemDetailsMutation()
+                                            form.setValue('isAdvanceModeEnable',isAdvanceModeEnable)
                                             setBarcodeInputValue("")
                                         }}>
                                             <Feather name="x-circle" size={24} />
@@ -156,19 +174,20 @@ export default function ScanItemForm() {
                                                 onValueChange={(option) => { field.onChange(option?.value); console.log(field.value) }}
                                                 value={{
                                                     value: field.value,
-                                                    label: (data?.data?.units ?? [])
+                                                    label: (itemDetails?.data?.units ?? [])
                                                         .find(u => u.id === field.value)?.unitName ?? "Select an unit"
                                                 }}
+                                                disabled={!itemDetails}
 
                                             >
-                                                <SelectTrigger onLayout={(e) => setTriggerWidth(e.nativeEvent.layout.width)}>
+                                                <SelectTrigger onLayout={(e) => setTriggerWidth(e.nativeEvent.layout.width)} disabled={!itemDetails||!itemDetails.data }>
                                                     <SelectValue placeholder="UOM" />
                                                 </SelectTrigger>
                                                 <SelectContent style={{ width: triggerWidth }}>
                                                     <SelectGroup>
                                                         <SelectLabel>Units</SelectLabel>
                                                         {
-                                                            (data && data.data ? data.data.units : []).map((unit, i) => (
+                                                            (itemDetails && itemDetails.data ? itemDetails.data.units : []).map((unit, i) => (
                                                                 <SelectItem
                                                                     value={unit?.id ?? "N/A"}
                                                                     label={`${unit.unitName ?? "N/A"} (${unit.packing})`}
@@ -219,10 +238,10 @@ export default function ScanItemForm() {
                                     <View className='flex-row items-center justify-between'>
                                         <Label>Advance Mode</Label>
                                         <Switch
-                                            onCheckedChange={(isEnable) => {
+                                            onCheckedChange={async(isEnable) => {
                                                 field.onChange(isEnable)
                                                 form.setValue('scanFor', isEnable ? 'Inventory' : undefined)
-
+                                                await saveIntoSecureStore('isAdvanceModeEnable',isEnable)
                                             }}
                                             checked={field.value}
                                         />
@@ -256,7 +275,7 @@ export default function ScanItemForm() {
                                                         const isActive = form.getValues('scanFor') === variant
                                                         return (
                                                             <Pressable onPress={() => field.onChange(variant)} key={variant} className={cn('flex-1 rounded-md', isActive ? 'bg-black' : "")}>
-                                                                <Text className={cn('py-2 text-center font-semibold', isActive && "text-white")}>
+                                                                <Text className={cn('py-1 text-center font-semibold', isActive && "text-white")}>
                                                                     {variant}  {isActive && <FontAwesome6 name='check' color="#fff" size={14} />}
                                                                 </Text>
                                                             </Pressable>
@@ -282,13 +301,13 @@ export default function ScanItemForm() {
                 <Separator className="my-3" />
                 <View>
                     {
-                        (barcodeInputValue && data?.data) && (
+                        (itemDetails&&itemDetails.data) && (
                             <>
                                 <ItemDetails header={{ title: "Item Details", description: "Scanned item" }} item={{
-                                    description: data.data?.description ?? "N/A",
-                                    item_code: data.data?.item_code,
-                                    price: data.data?.price,
-                                    unit: data.data?.unitName,
+                                    description: itemDetails.data?.description ?? "N/A",
+                                    item_code: itemDetails.data?.item_code,
+                                    price: itemDetails.data?.price,
+                                    unit: itemDetails.data?.unitName,
                                     isAlreadyScanned: false
                                 }} />
                                 <Separator className="my-3" />
