@@ -1,9 +1,18 @@
+import { multitaskVariantValues } from "@/constants"
 import { db } from "@/drizzle/db"
 import { barcodeTable, itemTable, storedScannedItemTable, supplierTable, unitTable } from "@/drizzle/schema"
 import { consoleLog } from "@/lib/log"
 import { and, desc, eq, like, or } from "drizzle-orm"
 
-export const getItemByScanBarcode = async (scannedBarcode: string) => {
+export const getItemByScanBarcode = async (
+    { scanFor, isAdvanceModeEnable, barcode: scannedBarcode }: {
+        barcode: string;
+        scanFor: typeof multitaskVariantValues[number] | undefined;
+        isAdvanceModeEnable: boolean;
+    }) => {
+
+    consoleLog({ scanFor, isAdvanceModeEnable, scannedBarcode })
+
     const [itemResponse] = await db
         .select()
         .from(barcodeTable)
@@ -44,23 +53,19 @@ export const getItemByScanBarcode = async (scannedBarcode: string) => {
      * 4. if exist return the stored data
      * 
      */
+    const isScanForOrder = isAdvanceModeEnable && scanFor === 'Order'
 
     const storedItemsByItemCode = await db.select().from(storedScannedItemTable)
-    .innerJoin(itemTable,eq(itemTable.id,barcodeTable.itemId))
-    .rightJoin(barcodeTable,eq(barcodeTable.id,storedScannedItemTable.barcodeId))
-    .where(and(
-        eq(itemTable.item_code,item.item_code),
-        eq(storedScannedItemTable.scanFor,'Order'),
-    ))
+        .innerJoin(itemTable, eq(itemTable.id, barcodeTable.itemId))
+        .rightJoin(barcodeTable, eq(barcodeTable.id, storedScannedItemTable.barcodeId))
+        .where(and(
+            eq(itemTable.item_code, item.item_code),
+            eq(storedScannedItemTable.scanFor, 'Order'),
+        ))
 
-    const isAlreadyScanned = storedItemsByItemCode.some(({stored_scanned_item,}) =>{
-        const isScannedForOrder = stored_scanned_item?.scanFor === 'Order'
+    const hasStoredItems = storedItemsByItemCode.length > 0
 
-    })
-    const [existStored] = storedItemsByItemCode
-
-    consoleLog({ existStored,storedLength:storedItemsByItemCode.length })
-
+    const isAlreadyScanned = storedItemsByItemCode.some(({ stored_scanned_item, }) => stored_scanned_item?.scanFor === 'Order')
 
 
     const data = {
@@ -68,6 +73,14 @@ export const getItemByScanBarcode = async (scannedBarcode: string) => {
         ...barcode,
         ...unit,
         units
+    }
+
+    if (isScanForOrder && hasStoredItems && isAlreadyScanned) {
+        const [existStored] = storedItemsByItemCode
+        return {
+            ...data,
+            storedId: existStored?.stored_scanned_item?.id
+        }
     }
 
     return {

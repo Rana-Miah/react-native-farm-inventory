@@ -1,19 +1,22 @@
+import { multitaskVariantValues } from "@/constants"
 import { useGetItemByBarcode } from "@/hooks/tanstack-query/item-query"
 import { ScanItemFormData } from "@/schema/scan-item-form-schema"
 import { useQueryClient } from "@tanstack/react-query"
 import React from "react"
 import { UseFormReturn } from "react-hook-form"
-import Toast from 'react-native-toast-message';
+import Toast from 'react-native-toast-message'
 
 
-export function useScanItem({ barcode, form, quantityRef }: {
-    barcode: string,
-    form: UseFormReturn<ScanItemFormData>,
+export function useScanItem({ barcode, form, quantityRef, isAdvanceModeEnable, scanFor }: {
+    barcode: string;
+    scanFor: typeof multitaskVariantValues[number] | undefined;
+    isAdvanceModeEnable: boolean;
+    form: UseFormReturn<ScanItemFormData>;
     quantityRef: React.RefObject<any>
 }) {
     const qc = useQueryClient()
 
-    const itemResponse = useGetItemByBarcode(barcode)
+    const itemResponse = useGetItemByBarcode({ barcode, isAdvanceModeEnable, scanFor })
     const { data, isError } = itemResponse
 
     React.useEffect(() => {

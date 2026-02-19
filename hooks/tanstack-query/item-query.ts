@@ -1,12 +1,18 @@
-import { getItemByBarcode, getItemByScanBarcode, getStoredScannedItems } from "@/data-access-layer/get-item"
-import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { multitaskVariantValues } from "@/constants";
+import { getItemByBarcode, getItemByScanBarcode, getStoredScannedItems } from "@/data-access-layer/get-item";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 
 
-export const useGetItemByBarcode = (barcode: string) => {
+export const useGetItemByBarcode = (
+    { scanFor, isAdvanceModeEnable, barcode }: {
+        barcode: string;
+        scanFor: typeof multitaskVariantValues[number] | undefined;
+        isAdvanceModeEnable: boolean;
+    }) => {
     return useQuery({
-        queryKey: ['get-item-by-barcode', barcode],
-        queryFn: () => getItemByScanBarcode(barcode),
+        queryKey: ['get-item-by-barcode', { scanFor, isAdvanceModeEnable, barcode }],
+        queryFn: () => getItemByScanBarcode({ scanFor, isAdvanceModeEnable, barcode }),
         enabled: !!barcode,
     })
 }
