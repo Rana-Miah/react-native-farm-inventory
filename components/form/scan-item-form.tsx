@@ -196,7 +196,8 @@ export default function ScanItemForm() {
                                 description: data.data?.description ?? "N/A",
                                 item_code: data.data?.item_code,
                                 price: data.data?.price,
-                                unit: data.data?.unitName
+                                unit: data.data?.unitName,
+                                isAlreadyScanned: false
                             }} />
                             <Separator className="my-3" />
                         </>

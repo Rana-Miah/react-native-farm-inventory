@@ -5,7 +5,7 @@ import React from "react"
 import { UseFormReturn } from "react-hook-form"
 import { Toast } from "toastify-react-native"
 
-export function useScanItem({ barcode,form,quantityRef}: {
+export function useScanItem({ barcode, form, quantityRef }: {
     barcode: string,
     form: UseFormReturn<ScanItemFormData>,
     quantityRef: React.RefObject<any>
@@ -18,7 +18,7 @@ export function useScanItem({ barcode,form,quantityRef}: {
     React.useEffect(() => {
         if (!barcode) return
 
-        if (isError || !data||!data.data) {
+        if (isError || !data || !data.data) {
             Toast.show({ type: "error", text1: "Item not found!" })
             return
         }
@@ -27,7 +27,7 @@ export function useScanItem({ barcode,form,quantityRef}: {
         quantityRef.current?.focus()
 
         Toast.show({ type: "success", text1: data.msg })
-    }, [barcode, data, isError])
+    }, [barcode, data, isError, form, quantityRef])
 
     const resetAll = async () => {
         form.reset()
