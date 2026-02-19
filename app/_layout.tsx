@@ -3,7 +3,8 @@ import { PortalHost } from "@rn-primitives/portal";
 import { QueryClientProvider } from '@tanstack/react-query';
 import { Tabs } from "expo-router";
 import 'react-native-reanimated';
-import ToastManager from 'toastify-react-native';
+import Toast from 'react-native-toast-message';
+
 
 import StoreProvider from "@/components/provider/redux-store-provider";
 import { queryClient } from "@/lib/tanstack-query/client";
@@ -32,7 +33,7 @@ export default function RootLayout() {
             ))}
           </Tabs>
           <PortalHost />
-          <ToastManager />
+          <Toast />
         </SafeAreaProvider>
       </StoreProvider>
     </QueryClientProvider>
@@ -44,7 +45,7 @@ type RootLayoutScreens = Parameters<typeof Tabs.Screen>[0]
 
 const rootLayoutScreens: RootLayoutScreens[] = [
   {
-    name: "(home)",
+    name: "index",
     options: {
       tabBarLabel: "Home",
       tabBarIcon: ({ color, size }) => (

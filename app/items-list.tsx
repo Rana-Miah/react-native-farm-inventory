@@ -12,7 +12,8 @@ import { onClose, onOpen } from '@/lib/redux/slice/alert-modal-slice'
 import { useQueryClient } from '@tanstack/react-query'
 import React, { useState } from 'react'
 import { FlatList, View } from 'react-native'
-import { Toast } from 'toastify-react-native'
+import Toast from 'react-native-toast-message';
+
 
 type ActionState =
   { type: 'update' | 'delete', item: StoredItem }
@@ -50,11 +51,17 @@ const ItemsList = () => {
               refetchSearch()
             }
             if (!data.data) {
-              Toast.error(data.msg,'center')
+             Toast.show({
+                            type: 'error',
+                            text1: data?.msg,
+                        })
               return
             }
             refetch()
-            Toast.success(data.msg)
+            Toast.show({
+                            type: 'success',
+                            text1: data?.msg,
+                        })
           },
         }
       )

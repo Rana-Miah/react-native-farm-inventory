@@ -119,16 +119,17 @@ function FormLabel({
 
 type FormControlProps = {
     children: React.ReactNode
+    className?:string
 }
 
-function FormControl({ children }: FormControlProps) {
+function FormControl({ children,className }: FormControlProps) {
     const { error } = useFormField()
 
     return (
         <View
             className={cn(
-                "rounded-md border border-border overflow-hidden",
-                error && "border border-destructive"
+                className,
+                error && "rounded-md border border-destructive overflow-hidden",
             )}
         >
             {children}
