@@ -3,7 +3,7 @@ import { ScanItemFormData } from "@/schema/scan-item-form-schema"
 import { useMutation } from "@tanstack/react-query"
 
 
-export const useScanBarcode = () => {
+export const useInsertStoredScannedItem = () => {
     return useMutation({
         mutationKey: ['insert-scanned-item'],
         mutationFn: (payload: ScanItemFormData) => insertScannedItem(payload),

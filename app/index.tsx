@@ -14,17 +14,12 @@ import ScanItemForm from '@/components/form/scan-item-form';
 import { Text } from "@/components/ui/text";
 import { useGetStoredScannedItems } from '@/hooks/tanstack-query/item-query';
 import { Feather } from '@expo/vector-icons';
-import { useQueryClient } from '@tanstack/react-query';
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
-import { Link } from 'expo-router';
 
 export default function Index() {
 
   const { success, error } = useMigrations(db, migrations);
   const { data } = useGetStoredScannedItems()
-
-  const qs = useQueryClient()
-
 
   const storedScannedItems = data ? data : []
 
@@ -73,17 +68,6 @@ export default function Index() {
           />
         )
       }
-
-      <View className='py-2 w-full'>
-        <Link
-          href={'/(home)/advance'}
-          asChild
-        >
-          <Text className='text-center p-2 bg-black active:bg-black/70 text-white active:text-white/70 font-semibold rounded-lg'>
-            Multitask Scan
-          </Text>
-        </Link>
-      </View>
     </Container>
   );
 }

@@ -184,7 +184,7 @@ export type StoredItem = NonNullable<Awaited<ReturnType<typeof getStoredScannedI
  * @returns 
  */
 
-export const getItemDetailsByBarcodeWithAdvanceFeture = async (
+export const getItemDetailsByBarcodeWithAdvanceFeature = async (
     { scanFor, isAdvanceModeEnable, barcode: scannedBarcode }: {
         barcode: string;
         scanFor: typeof multitaskVariantValues[number] | undefined;

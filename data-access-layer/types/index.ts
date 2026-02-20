@@ -1,3 +1,3 @@
-import { getItemDetailsByBarcodeWithAdvanceFeture } from "../get-item";
+import { getItemDetailsByBarcodeWithAdvanceFeature } from "../get-item";
 
-export type GetItemDetailsByBarcodeWithAdvanceFeture = Parameters<typeof getItemDetailsByBarcodeWithAdvanceFeture>[number]
+export type GetItemDetailsByBarcodeWithAdvanceFeature = Parameters<typeof getItemDetailsByBarcodeWithAdvanceFeature>[number]
