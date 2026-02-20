@@ -198,7 +198,6 @@ export type StoredItem = NonNullable<
  * @returns
  */
 
-
 type StoredScanned = {
   item: {
     id: string;
@@ -230,33 +229,33 @@ type StoredScanned = {
   } | null;
 };
 
-type Data = const data: {
-    units: {
-        id: string;
-        unitName: string;
-        packing: number;
-    }[];
+type Data = {
+  units: {
     id: string;
     unitName: string;
     packing: number;
-    createdAt: Date;
-    updatedAt: Date;
-    barcode: string;
-    price: number;
-    promoPrice: number | null;
-    description: string | null;
-    itemId: string;
-    unitId: string;
-    supplierId: string;
-    item_code: string;
-    item_description: string;
-}
+  }[];
+  id: string;
+  unitName: string;
+  packing: number;
+  createdAt: Date;
+  updatedAt: Date;
+  barcode: string;
+  price: number;
+  promoPrice: number | null;
+  description: string | null;
+  itemId: string;
+  unitId: string;
+  supplierId: string;
+  item_code: string;
+  item_description: string;
+};
 
+type WithStored = Data & {
+  storedItem: StoredScanned;
+};
 
-type WithStored = Data&{
-  stored
-}
-
+type ResponseData = Data | WithStored;
 
 export const getItemDetailsByBarcodeWithAdvanceFeature = async ({
   scanFor,
@@ -266,7 +265,7 @@ export const getItemDetailsByBarcodeWithAdvanceFeature = async ({
   barcode: string;
   scanFor: (typeof multitaskVariantValues)[number] | undefined;
   isAdvanceModeEnable: boolean;
-}) :Promise<{msg:string,data:any}>=> {
+}): Promise<{ msg: string; data: ResponseData | null }> => {
   consoleLog({ scanFor, isAdvanceModeEnable, scannedBarcode });
 
   const [itemResponse] = await db

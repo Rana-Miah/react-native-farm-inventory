@@ -102,16 +102,7 @@ export default function ScanItemForm() {
         resetItemDetailsMutation();
       },
     });
-    const currentAdvanceMode = getFormValues("isAdvanceModeEnable");
-    const currentScanFor = getFormValues("scanFor");
-
-    resetForm({
-      barcode: "",
-      unitId: "",
-      quantity: 1,
-      isAdvanceModeEnable: currentAdvanceMode,
-      scanFor: currentAdvanceMode ? (currentScanFor ?? "Inventory") : undefined,
-    });
+    handleResetForm();
 
     barcodeInputRef.current?.focus();
   });
@@ -147,12 +138,25 @@ export default function ScanItemForm() {
     [getItemDetailsMutation, isAdvanceModeEnable, scanFor, setFormValue],
   );
 
+  const handleResetForm = () => {
+    const currentAdvanceMode = getFormValues("isAdvanceModeEnable");
+    const currentScanFor = getFormValues("scanFor");
+
+    resetForm({
+      barcode: "",
+      unitId: "",
+      quantity: 1,
+      isAdvanceModeEnable: currentAdvanceMode,
+      scanFor: currentAdvanceMode ? (currentScanFor ?? "Inventory") : undefined,
+    });
+  };
+
   const handleBarcodeSubmit = React.useCallback(() => {
     const barcode = getFormValues("barcode");
     handleOnSubmitEditing(barcode);
   }, [getFormValues, handleOnSubmitEditing]);
 
-  useDefaultUnitFromItemDetails(form, itemDetails?.data);
+  useDefaultUnitFromItemDetails(form, itemDetails?.data ?? null);
 
   useEffect(() => {
     const loadAdvanceMode = async () => {
@@ -214,7 +218,7 @@ export default function ScanItemForm() {
                   <View className="absolute right-2.5 top-1/2 -translate-y-1/2">
                     <TouchableOpacity
                       onPress={async () => {
-                        resetForm();
+                        handleResetForm();
                         resetItemDetailsMutation();
                       }}
                     >
@@ -398,13 +402,7 @@ export default function ScanItemForm() {
             <>
               <ItemDetails
                 header={{ title: "Item Details", description: "Scanned item" }}
-                item={{
-                  description: itemDetails.data?.description ?? "N/A",
-                  item_code: itemDetails.data?.item_code,
-                  price: itemDetails.data?.price,
-                  unit: itemDetails.data?.unitName,
-                  isAlreadyScanned: false,
-                }}
+                item={itemDetails.data}
               />
               <Separator className="my-3" />
             </>
