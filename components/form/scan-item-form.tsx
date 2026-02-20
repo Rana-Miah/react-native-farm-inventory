@@ -1,7 +1,6 @@
 import { multitaskVariantValues } from "@/constants";
 import { useGetStoredScannedItems } from "@/hooks/tanstack-query/item-query";
 import { useGetItemDetailsMutationWithFeature } from "@/hooks/tanstack-query/mutation/get-item-details-mutation";
-import { useInsertStoredScannedItem } from "@/hooks/tanstack-query/scanned-item-mutation";
 import { useCountDown } from "@/hooks/use-count-down";
 import { useDefaultUnitFromItemDetails } from "@/hooks/use-default-unit";
 import {
@@ -43,7 +42,7 @@ import {
 import { Separator } from "../ui/separator";
 import { Switch } from "../ui/switch";
 import { Text } from "../ui/text";
-import { consoleLog } from "@/lib/log";
+import { useInsertStoredScannedItemMutation } from "@/hooks/tanstack-query/mutation/insert-stored-scanned-item-mutation";
 
 export default function ScanItemForm() {
   const [isHydrated, setIsHydrated] = React.useState(false);
@@ -88,7 +87,7 @@ export default function ScanItemForm() {
 
   //! Tanstack mutation hook
   const { mutate: insertStoredScannedItemMutation } =
-    useInsertStoredScannedItem();
+    useInsertStoredScannedItemMutation();
 
   //! handle submit function
   const onSubmit = handleSubmit(async (value) => {
@@ -111,7 +110,7 @@ export default function ScanItemForm() {
       unitId: "",
       quantity: 1,
       isAdvanceModeEnable: currentAdvanceMode,
-      scanFor: currentAdvanceMode ? currentScanFor : undefined,
+      scanFor: currentAdvanceMode ? (currentScanFor ?? "Inventory") : undefined,
     });
 
     barcodeInputRef.current?.focus();
