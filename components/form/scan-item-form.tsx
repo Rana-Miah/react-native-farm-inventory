@@ -44,10 +44,16 @@ import { Switch } from "../ui/switch";
 import { Text } from "../ui/text";
 import { useInsertStoredScannedItemMutation } from "@/hooks/tanstack-query/mutation/insert-stored-scanned-item-mutation";
 import { usePersistAdvanceMode } from "@/hooks/use-persist-advance-mode";
+import { useDeleteScannedItemQuantityMutation } from "@/hooks/tanstack-query/mutation/delete-stored-scanned-item-mutation";
+import { useUpdateScannedItemQuantityMutation } from "@/hooks/tanstack-query/mutation/update-stored-scanned-item-quantity-mutation";
+import { useAppDispatch } from "@/hooks/redux";
+import { onClose } from "@/lib/redux/slice/alert-modal-slice";
 
 export default function ScanItemForm() {
   const [triggerWidth, setTriggerWidth] = React.useState(0);
   const { isTimerFinish, startTimer } = useCountDown(5);
+  const dispatch = useAppDispatch();
+
   const quantityInputRef = React.useRef<any>(null);
   const barcodeInputRef = React.useRef<any>(null);
   const { refetch: refetchStoredItems } = useGetStoredScannedItems();
@@ -88,6 +94,10 @@ export default function ScanItemForm() {
   //! Tanstack mutation hook
   const { mutate: insertStoredScannedItemMutation } =
     useInsertStoredScannedItemMutation();
+  const { mutate: deleteScannedItemMutation } =
+    useDeleteScannedItemQuantityMutation();
+  const { mutate: updateScannedItemMutation } =
+    useUpdateScannedItemQuantityMutation();
 
   //! handle submit function
   const onSubmit = handleSubmit(async (value) => {
@@ -134,6 +144,7 @@ export default function ScanItemForm() {
     [getItemDetailsMutation, isAdvanceModeEnable, scanFor, setFormValue],
   );
 
+  // handle reset form
   const handleResetForm = () => {
     const currentAdvanceMode = getFormValues("isAdvanceModeEnable");
     const currentScanFor = getFormValues("scanFor");
@@ -373,6 +384,32 @@ export default function ScanItemForm() {
                     : "Scanned item",
                 }}
                 item={itemDetails.data}
+                onUpdate={(item, quantity) => {
+                  updateScannedItemMutation(
+                    {
+                      storedScannedItemId: item.storedItem?.storedId!,
+                      quantity: quantity.toString(),
+                    },
+                    {
+                      onSuccess() {
+                        dispatch(onClose());
+                        handleResetForm();
+                        refetchStoredItems();
+                        resetItemDetailsMutation();
+                      },
+                    },
+                  );
+                }}
+                onDelete={(item) => {
+                  deleteScannedItemMutation(item.storedItem?.storedId!, {
+                    onSuccess() {
+                      dispatch(onClose());
+                      refetchStoredItems();
+                      handleResetForm();
+                      resetItemDetailsMutation();
+                    },
+                  });
+                }}
               />
               <Separator className="my-3" />
             </>

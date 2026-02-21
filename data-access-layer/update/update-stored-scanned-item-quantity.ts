@@ -1,5 +1,6 @@
 import { db } from "@/drizzle/db";
 import { storedScannedItemTable } from "@/drizzle/schema";
+import { consoleLog } from "@/lib/log";
 import { eq } from "drizzle-orm";
 
 export const updateScannedItemQuantity = async (payload: {
@@ -15,6 +16,12 @@ export const updateScannedItemQuantity = async (payload: {
     .select()
     .from(storedScannedItemTable)
     .where(eq(storedScannedItemTable.id, payload.storedScannedItemId));
+
+  consoleLog({
+    from: "inside update scan quantity",
+    payloadId: payload.storedScannedItemId,
+    existStoredScannedItem,
+  });
 
   if (!existStoredScannedItem)
     return { msg: "Scanned item not found!", data: null };
